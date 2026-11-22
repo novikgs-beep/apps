@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1B365D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>ICE Family Binder 2.1: Interactive Print & Digital Household Vault</title>
+<style>
+  :root { --navy: #1B365D; --slate: #2C4D75; --teal: #0F766E; --cream: #FAF8F5; --bg: #F1F5F9; --card: #FFFFFF; --text: #0F172A; --muted: #64748B; --border: #CBD5E1; --warn-bg: #FEF3C7; }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Liberation Sans", Helvetica, Arial, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 70px; }
+  header { background: var(--navy); color: #fff; padding: 14px 16px 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.18); }
+  .hdr-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  header h1 { margin: 0 0 2px; font-size: 18px; }
+  header p { margin: 0; font-size: 12px; color: #CBD5E1; }
+  .readiness-badge { background: rgba(255,255,255,0.14); padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .prog-track { width: 80px; height: 7px; background: rgba(255,255,255,0.25); border-radius: 999px; overflow: hidden; }
+  .prog-fill { height: 100%; background: #4ADE80; width: 0%; transition: width 0.3s; }
+  .nav-tabs { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .nav-tab { background: rgba(255,255,255,0.12); color: #E2E8F0; border: none; border-radius: 8px; padding: 8px 11px; font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .nav-tab.active { background: #fff; color: var(--navy); }
+  .container { max-width: 920px; margin: 0 auto; padding: 14px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .card h2 { margin: 0 0 8px; font-size: 16px; color: var(--navy); }
+  .card h3 { margin: 14px 0 6px; font-size: 13.5px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.4px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; color: var(--text); }
+  .sec-banner { background: #EBF3FA; border-left: 4px solid var(--navy); padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+  .warn-banner { background: var(--warn-bg); border-left: 4px solid #D97706; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; color: #78350F; margin-bottom: 12px; }
+  .sprint-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+  @media (max-width: 680px) { .sprint-grid { grid-template-columns: 1fr; } }
+  .sprint-card { background: var(--cream); border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px; }
+  .sprint-card strong { color: var(--navy); display: block; margin-bottom: 4px; font-size: 13.5px; }
+  .sprint-card p { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .mode-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .mode-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .btn-primary { background: var(--navy); color: #fff; border: none; border-radius: 10px; padding: 11px 16px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-teal { background: var(--teal); color: #fff; border: none; border-radius: 10px; padding: 11px 16px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-secondary { background: #E2E8F0; color: var(--text); border: none; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .print-page { background: #fff; border: 1px solid #94A3B8; border-radius: 6px; padding: 28px 28px 28px 46px; margin-bottom: 18px; color: #0F172A; font-family: Georgia, "Liberation Serif", "DejaVu Serif", "Times New Roman", serif; }
+  .print-page h2 { margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Liberation Sans", Arial, sans-serif; color: var(--navy); font-size: 15pt; border-bottom: 2px solid var(--navy); padding-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .print-page .sub { font-family: -apple-system, "Liberation Sans", Arial, sans-serif; font-size: 9.2pt; color: #475569; margin: 0 0 10px; }
+  .print-page table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-family: -apple-system, "Liberation Sans", Arial, sans-serif; font-size: 9.6pt; }
+  .print-page th, .print-page td { border: 1px solid #94A3B8; padding: 6.5px 8.5px; text-align: left; vertical-align: top; word-wrap: break-word; }
+  .print-page th { background: #F1F5F9; color: #1B365D; font-weight: 700; width: 34%; }
+  .cover-box { text-align: center; border: 3px double var(--navy); padding: 48px 28px; background: var(--cream); min-height: 740px; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover-kicker { font-family: -apple-system, "Liberation Sans", Arial, sans-serif; letter-spacing: 3px; font-size: 11pt; color: var(--teal); font-weight: 700; text-transform: uppercase; }
+  .cover-title { font-size: 29pt; color: var(--navy); margin: 14px 0 8px; line-height: 1.15; }
+  .cover-sub { font-family: -apple-system, "Liberation Sans", Arial, sans-serif; font-size: 11.5pt; color: #475569; max-width: 480px; margin: 0 auto; }
+  .cover-family { font-size: 20pt; color: var(--navy); margin: 26px 0 12px; font-weight: 700; border-top: 1px solid var(--navy); border-bottom: 1px solid var(--navy); padding: 14px 0; }
+  .cover-meta { font-family: -apple-system, "Liberation Sans", Arial, sans-serif; font-size: 10.2pt; color: #334155; line-height: 1.7; }
+  .spines-page { padding: 0.16in 0.25in !important; }
+  .spines-page h2 { font-size: 10.5pt !important; margin: 0 0 2px !important; padding-bottom: 2px !important; }
+  .spines-page .sub { font-size: 8pt !important; margin: 0 0 6px !important; }
+  .spines-wrap { display: flex; gap: 14px; justify-content: center; align-items: flex-start; padding: 0; }
+  .spine { height: 9.15in; border: 1.5px dashed #64748B; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; text-orientation: mixed; font-family: -apple-system, "Liberation Sans", Arial, sans-serif; font-weight: 700; letter-spacing: 1px; text-align: center; padding: 12px 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .spine.s1 { width: 1in; font-size: 9.2pt; }
+  .spine.s15 { width: 1.5in; font-size: 11.2pt; }
+  .spine.s2 { width: 2in; font-size: 13pt; }
+  .spine small { display: block; font-weight: 400; color: #CBD5E1; margin-right: 6px; font-size: 8pt; }
+  .wallet-grid { display: grid; grid-template-columns: 3.375in 3.375in; gap: 0.2in; justify-content: center; margin-top: 12px; }
+  .wallet-card { width: 3.375in; height: 2.125in; border: 1.5px dashed #1B365D; border-radius: 6px; overflow: hidden; font-family: -apple-system, "Liberation Sans", Arial, sans-serif; font-size: 7.6pt; line-height: 1.28; background: #fff; }
+  .wc-hdr { background: #B91C1C; color: #fff; padding: 4px 8px; font-weight: 700; font-size: 8.2pt; display: flex; justify-content: space-between; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .wc-body { padding: 5px 8px; }
+  .wc-body div { margin-bottom: 2.5px; border-bottom: 1px dotted #CBD5E1; padding-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .divider-page { min-height: 700px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: var(--cream); border: 2px solid var(--navy); }
+  .divider-num { font-family: -apple-system, "Liberation Sans", Arial, sans-serif; font-size: 13pt; font-weight: 700; color: var(--teal); letter-spacing: 3px; text-transform: uppercase; }
+  .divider-title { font-size: 25pt; color: var(--navy); margin: 12px 0; }
+  .divider-desc { font-family: -apple-system, "Liberation Sans", Arial, sans-serif; font-size: 11pt; color: #475569; max-width: 440px; }
+  .disclaimer { font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 16px; padding: 12px; background: #E2E8F0; border-radius: 8px; }
+  @media print {
+    body { background: #fff; padding: 0; margin: 0; }
+    header, .no-print, .disclaimer, .warn-banner, .btn-row { display: none !important; }
+    .container { max-width: 100%; padding: 0; margin: 0; }
+    .tab-panel { display: none !important; }
+    .tab-panel.print-active { display: block !important; }
+    .print-page { border: none; border-radius: 0; margin: 0; padding: 0.35in 0.35in 0.35in 0.75in; page-break-after: always; break-after: page; }
+    .print-page:last-child { page-break-after: auto; break-after: auto; }
+    .cover-box { min-height: 8.8in; }
+    .divider-page { min-height: 8.8in; }
+  }
+</style>
+<style id="dynamic-page-size">@page { size: letter portrait; margin: 0.25in; }</style>
+</head>
+<body>
+<header class="no-print">
+  <div class="hdr-top">
+    <div><h1>ICE Family Binder 2.1: Interactive Print & Digital Vault</h1><p>100% Private (stored locally on your device) • Type once, print US Letter (3-Ring) or A4, Wallet Cards & Spines</p></div>
+    <div class="readiness-badge"><span id="readiness-txt">Readiness: 0%</span><div class="prog-track"><div class="prog-fill" id="readiness-bar"></div></div></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('t-start', this)">Start & 30-Min Roadmap</button>
+    <button class="nav-tab" onclick="switchTab('t-s1', this)">Sec 1-2: Home & Medical</button>
+    <button class="nav-tab" onclick="switchTab('t-s2', this)">Sec 3-4: Digital & Money</button>
+    <button class="nav-tab" onclick="switchTab('t-s3', this)">Sec 5-8: Insurance, Bills & Kids</button>
+    <button class="nav-tab" onclick="switchTab('t-print', this)">Print Studio (Binder, Spines & Wallet Cards)</button>
+  </div>
+</header>
+<div class="container">
+  <section id="t-start" class="tab-panel active">
+    <div class="card">
+      <h2>Welcome to Your Calm, 30-Minute Emergency Safety Net</h2>
+      <div class="sec-banner"><strong>Zero-Plaintext Security Protocol:</strong> Never type raw passwords, PINs, or full Social Security Numbers here. Record only password manager hints, last 4 digits of accounts, and physical locations of recovery keys or 2FA devices.</div>
+      <div class="sprint-grid">
+        <div class="sprint-card"><strong>Sprint 1 (Minutes 0-10)</strong><p>Family profile, home utility shut-offs (water/gas/breaker), allergies, medications, and health insurance.</p></div>
+        <div class="sprint-card"><strong>Sprint 2 (Minutes 10-20)</strong><p>Safe digital access map (1Password/Bitwarden hints, Apple/Google Legacy), banking, retirement & debts.</p></div>
+        <div class="sprint-card"><strong>Sprint 3 (Minutes 20-30)</strong><p>Insurance policies, monthly auto-pay bills, legal original locations (Will/Trust/Deeds), kids & pets.</p></div>
+      </div>
+      <h3>Household Cover Details</h3>
+      <div class="grid-2">
+        <div><label>Family Last Name (for Cover & Binder Spines)</label><input type="text" id="b-family" placeholder="SMITH" oninput="saveAll()"></div>
+        <div><label>Primary Home Address</label><input type="text" id="b-addr" placeholder="1420 Maple Lane, Austin, TX 78704" oninput="saveAll()"></div>
+        <div><label>Where This Physical Binder Is Kept</label><input type="text" id="b-loc" placeholder="Home Office Top Shelf / Fireproof Safe" oninput="saveAll()"></div>
+        <div><label>Last Updated Date (Auto-sets 6-Month Review)</label><input type="date" id="b-date" oninput="saveAll()"></div>
+      </div>
+      <h3>Paper Size & Smart Tools</h3>
+      <div class="pill-row">
+        <button class="mode-btn active" id="sz-letter" onclick="setPaperSize('letter')">US Letter (8.5 x 11" + 3-Ring Margin)</button>
+        <button class="mode-btn" id="sz-a4" onclick="setPaperSize('a4')">International A4 (UK / EU / AU)</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn-teal" onclick="downloadICS()">Add 6-Month Review Reminder to Calendar (.ics)</button>
+        <button class="btn-secondary" onclick="exportJSON()">Save Local Backup (.json)</button>
+        <button class="btn-secondary" onclick="document.getElementById('imp-json').click()">Load Backup (.json)</button>
+        <input type="file" id="imp-json" accept=".json" style="display:none" onchange="importJSON(event)">
+        <button class="btn-secondary" style="color:#B91C1C;" onclick="resetAll()">Clear All Data</button>
+      </div>
+    </div>
+  </section>
+  <section id="t-s1" class="tab-panel">
+    <div class="card">
+      <h2>Section 1: Immediate Emergency & Home Utility Shut-Offs</h2>
+      <div class="grid-2">
+        <div><label>Main Water Shut-Off Valve Location</label><input type="text" id="s1-water" placeholder="Basement north wall behind water heater" oninput="saveAll()"></div>
+        <div><label>Main Electrical Breaker Box Location</label><input type="text" id="s1-elec" placeholder="Garage left wall near laundry door" oninput="saveAll()"></div>
+        <div><label>Main Gas Shut-Off Valve & Wrench Location</label><input type="text" id="s1-gas" placeholder="Outside east wall; wrench hanging on pipe" oninput="saveAll()"></div>
+        <div><label>Home Alarm / Smart Lock Hint (No raw PIN)</label><input type="text" id="s1-alarm" placeholder="Hint: Anniversary year; SimpliSafe app" oninput="saveAll()"></div>
+        <div><label>Emergency Contact #1 (Name, Relation, Phone)</label><input type="text" id="s1-c1" placeholder="Sarah Miller (Sister) - (512) 555-0192" oninput="saveAll()"></div>
+        <div><label>Emergency Contact #2 / Spare Key Holder</label><input type="text" id="s1-c2" placeholder="David Chen (Neighbor #1422) - (512) 555-0148" oninput="saveAll()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Section 2: Medical & Health Vault (Auto-fills Wallet ICE Cards!)</h2>
+      <div class="grid-2">
+        <div><label>Member #1: Full Name, DOB & Blood Type</label><input type="text" id="m1-name" placeholder="Alex Smith | DOB 04/12/1986 | O+" oninput="saveAll()"></div>
+        <div><label>Member #1: Severe Allergies & Daily Meds</label><input type="text" id="m1-meds" placeholder="Allergy: Penicillin | Meds: Lisinopril 10mg" oninput="saveAll()"></div>
+        <div><label>Member #2: Full Name, DOB & Blood Type</label><input type="text" id="m2-name" placeholder="Jordan Smith | DOB 09/23/1988 | A+" oninput="saveAll()"></div>
+        <div><label>Member #2: Severe Allergies & Daily Meds</label><input type="text" id="m2-meds" placeholder="Allergy: None | Meds: Synthroid 50mcg" oninput="saveAll()"></div>
+        <div><label>Member #3 (Child/Parent): Name, DOB, Blood</label><input type="text" id="m3-name" placeholder="Maya Smith | DOB 06/15/2018 | O+" oninput="saveAll()"></div>
+        <div><label>Member #3: Allergies, Meds & Pediatrician</label><input type="text" id="m3-meds" placeholder="Allergy: Peanuts (EpiPen in backpack)" oninput="saveAll()"></div>
+        <div><label>Member #4 (Child/Parent): Name, DOB, Blood</label><input type="text" id="m4-name" placeholder="Liam Smith | DOB 11/02/2021 | A+" oninput="saveAll()"></div>
+        <div><label>Member #4: Allergies & Daily Meds</label><input type="text" id="m4-meds" placeholder="No known allergies" oninput="saveAll()"></div>
+      </div>
+      <h3>US / EU Health Insurance, Pharmacy & Legal Medical Docs</h3>
+      <div class="grid-2">
+        <div><label>Health Insurance Carrier, Member ID & Group #</label><input type="text" id="s2-ins" placeholder="BCBS PPO | ID: XYZ992811 | Grp: 44012" oninput="saveAll()"></div>
+        <div><label>Pharmacy RxBIN / RxPCN / RxGroup & Preferred Pharmacy</label><input type="text" id="s2-rx" placeholder="BIN 004336 / PCN ADV | CVS on Main St" oninput="saveAll()"></div>
+        <div><label>Dental / Vision Insurance & HSA / FSA Card Bank</label><input type="text" id="s2-den" placeholder="Delta Dental | VSP | Fidelity HSA (last 4: 8821)" oninput="saveAll()"></div>
+        <div><label>HIPAA Authorization, Medical POA & Living Will Location</label><input type="text" id="s2-hipaa" placeholder="Signed originals in Home Fireproof Safe" oninput="saveAll()"></div>
+      </div>
+    </div>
+  </section>
+  <section id="t-s2" class="tab-panel">
+    <div class="card">
+      <h2>Section 3: Digital Life & Safe Access (Zero-Plaintext Protocol)</h2>
+      <div class="grid-2">
+        <div><label>Primary Password Manager & Login Email</label><input type="text" id="s3-pm" placeholder="1Password | family@example.com" oninput="saveAll()"></div>
+        <div><label>Master Password Hint (NEVER write actual password)</label><input type="text" id="s3-hint" placeholder="First street + childhood dog + graduation year" oninput="saveAll()"></div>
+        <div><label>Physical Emergency Kit / Recovery Key Location</label><input type="text" id="s3-key" placeholder="Printed 1Password Emergency Kit in Fireproof Safe" oninput="saveAll()"></div>
+        <div><label>2FA Authenticator Device & Backup Codes Location</label><input type="text" id="s3-2fa" placeholder="Primary iPhone + YubiKey in safe envelope" oninput="saveAll()"></div>
+        <div><label>Apple Legacy Contact Status</label><input type="text" id="s3-apple" placeholder="Spouse designated; Access Key printed in safe" oninput="saveAll()"></div>
+        <div><label>Google Inactive Account Manager Status</label><input type="text" id="s3-google" placeholder="Configured (3 months inactivity -> notifies spouse)" oninput="saveAll()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Section 4: Banking, Retirement, Investments & Debts</h2>
+      <div class="grid-2">
+        <div><label>Primary Checking & High-Yield Savings (Bank + Last 4)</label><textarea rows="2" id="s4-bank" placeholder="Chase Checking (•4821, Joint) | Marcus HYSA (•9034, Joint)" oninput="saveAll()"></textarea></div>
+        <div><label>Retirement Accounts (401k, IRA, Roth + Beneficiaries)</label><textarea rows="2" id="s4-ret" placeholder="Fidelity 401k (•1172, Spouse 100%, Contingent: Kids)" oninput="saveAll()"></textarea></div>
+        <div><label>Brokerage, Crypto & Safe Deposit Box (Location + Key)</label><textarea rows="2" id="s4-inv" placeholder="Charles Schwab Joint JTWROS (•3319) | Safe Box #412" oninput="saveAll()"></textarea></div>
+        <div><label>Mortgage, Auto Loans & Credit Cards (Last 4 Only)</label><textarea rows="2" id="s4-debt" placeholder="Wells Fargo Mortgage (•7750) | Chase Sapphire (•5512)" oninput="saveAll()"></textarea></div>
+      </div>
+    </div>
+  </section>
+  <section id="t-s3" class="tab-panel">
+    <div class="card">
+      <h2>Section 5: Insurance Policies (Life, Home, Auto, Umbrella)</h2>
+      <div class="grid-2">
+        <div><label>Life Insurance #1 & #2 (Carrier, Policy #, Benefit, Beneficiary)</label><textarea rows="2" id="s5-life" placeholder="Northwestern Mutual Term $1M (#LF-8839, Spouse 100%)" oninput="saveAll()"></textarea></div>
+        <div><label>Homeowners / Renters & Auto Insurance</label><textarea rows="2" id="s5-home" placeholder="State Farm Home (#HO-4410) | GEICO Auto (#AU-9920)" oninput="saveAll()"></textarea></div>
+        <div><label>Umbrella, Disability & Long-Term Care Policies</label><input type="text" id="s5-umb" placeholder="State Farm Umbrella $1M (#UM-1102)" oninput="saveAll()"></div>
+        <div><label>Insurance Agent Name & Direct Phone</label><input type="text" id="s5-agent" placeholder="Mark Reynolds - (512) 555-0199" oninput="saveAll()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Section 6: Monthly Bills & Auto-Pay Continuity Map</h2>
+      <div class="grid-2">
+        <div><label>Mortgage / Rent (Due Day & Payment Account)</label><input type="text" id="s6-mort" placeholder="1st of month | $2,150 | Auto-Pay Chase •4821" oninput="saveAll()"></div>
+        <div><label>Electric, Gas & Water Utilities</label><input type="text" id="s6-util" placeholder="City Power (12th), Gas (15th), Water (20th)" oninput="saveAll()"></div>
+        <div><label>Internet, Mobile Plan & Essential Subscriptions</label><input type="text" id="s6-net" placeholder="AT&T Fiber (8th), T-Mobile (18th), iCloud + 1Password" oninput="saveAll()"></div>
+        <div><label>Manual Bills (NOT on Auto-Pay! Must Pay Manually)</label><input type="text" id="s6-man" placeholder="HOA Quarterly Dues | Trash pickup" oninput="saveAll()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Section 7: Property, Vehicles & Legal Originals Map</h2>
+      <div class="grid-2">
+        <div><label>Will, Living Trust & Financial Power of Attorney Location</label><input type="text" id="s7-will" placeholder="Originals in Home Fireproof Safe" oninput="saveAll()"></div>
+        <div><label>Birth Certs, Marriage Cert, Passports & SSN Cards</label><input type="text" id="s7-id" placeholder="Fireproof Grab-Bag Folder inside safe" oninput="saveAll()"></div>
+        <div><label>Home Deed / Survey & Vehicle Titles</label><input type="text" id="s7-prop" placeholder="Manila envelope labeled PROPERTY inside safe" oninput="saveAll()"></div>
+        <div><label>Estate Attorney, CPA & Financial Advisor Contacts</label><input type="text" id="s7-adv" placeholder="Attorney: L. Carter | CPA: R. Diaz" oninput="saveAll()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Section 8: Kids, Pets & Caregiver Instructions</h2>
+      <div class="grid-2">
+        <div><label>Children's School / Daycare & Authorized Pickup List</label><input type="text" id="s8-sch" placeholder="Oak Elementary | Authorized: Sarah Miller, David Chen" oninput="saveAll()"></div>
+        <div><label>Designated Short-Term & Long-Term Legal Guardians</label><input type="text" id="s8-grd" placeholder="Short-term: Sarah Miller | Long-term: Named in Will" oninput="saveAll()"></div>
+        <div><label>Pets (Names, Microchip #, Feeding & Daily Meds)</label><input type="text" id="s8-pet" placeholder="Bella (Golden Retriever, Chip #985112)" oninput="saveAll()"></div>
+        <div><label>24/7 Emergency Vet Clinic & Trusted Pet Sitter</label><input type="text" id="s8-vet" placeholder="Austin 24hr Vet (512-555-0190)" oninput="saveAll()"></div>
+      </div>
+    </div>
+  </section>
+  <section id="t-print" class="tab-panel">
+    <div class="card no-print">
+      <h2>Print Studio: Clean 3-Ring Binder Output (US Letter / A4)</h2>
+      <div class="warn-banner"><strong>Zero-Clutter Print Guarantee:</strong> Clicking any Print button automatically hides all navigation bars, buttons, and disclaimers. Every section starts cleanly on its own page with a 0.75" left margin ready for a standard 3-ring binder.</div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="printBundle('full')">Print Complete Binder (Cover + 8 Sections + Wallet Cards)</button>
+        <button class="btn-teal" onclick="printBundle('wallet')">Print Wallet ICE Cards & 1-Page Crisis Card Only</button>
+        <button class="btn-secondary" onclick="printBundle('spines')">Print 1:1 Scale Binder Spines (1", 1.5", 2")</button>
+        <button class="btn-secondary" onclick="printBundle('dividers')">Print 8 Section Tab Dividers</button>
+      </div>
+    </div>
+    <div id="print-stage"></div>
+  </section>
+  <div class="disclaimer no-print">
+    <strong>Legal Disclaimer (hidden when printing):</strong> This product is for informational and household preparedness purposes only and does not constitute financial, legal, estate planning, tax, or medical advice. Verify all details independently with qualified professionals.
+  </div>
+</div>
+<script>
+const FIELD_IDS = ["b-family","b-addr","b-loc","b-date","s1-water","s1-elec","s1-gas","s1-alarm","s1-c1","s1-c2","m1-name","m1-meds","m2-name","m2-meds","m3-name","m3-meds","m4-name","m4-meds","s2-ins","s2-rx","s2-den","s2-hipaa","s3-pm","s3-hint","s3-key","s3-2fa","s3-apple","s3-google","s4-bank","s4-ret","s4-inv","s4-debt","s5-life","s5-home","s5-umb","s5-agent","s6-mort","s6-util","s6-net","s6-man","s7-will","s7-id","s7-prop","s7-adv","s8-sch","s8-grd","s8-pet","s8-vet"];
+function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+let store = JSON.parse(localStorage.getItem("ice_binder_v21") || localStorage.getItem("ice_binder_v2") || "{}");
+let paperSize = store.paperSize || "letter", currentPrintMode = "full";
+function v(id, fb="__________________________________________________") { const val=(store[id]||"").trim(); return val ? esc(val).replace(/\n/g,"<br>") : fb; }
+function getNextReviewDate(dateStr) { const dt=dateStr?new Date(dateStr+"T12:00:00"):new Date(); dt.setMonth(dt.getMonth()+6); return dt.toISOString().slice(0,10); }
+function saveAll() { FIELD_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) store[id]=el.value; }); store.paperSize=paperSize; localStorage.setItem("ice_binder_v21",JSON.stringify(store)); updateReadiness(); }
+function loadAll() { if(!store["b-date"]) store["b-date"]=new Date().toISOString().slice(0,10); FIELD_IDS.forEach(id=>{ const el=document.getElementById(id); if(el && store[id]!==undefined) el.value=store[id]; }); setPaperSize(paperSize,true); updateReadiness(); }
+function updateReadiness() { let f=0; FIELD_IDS.forEach(id=>{ if(store[id] && String(store[id]).trim().length>0) f++; }); const pct=Math.round((f/FIELD_IDS.length)*100); document.getElementById("readiness-txt").textContent=`Readiness: ${pct}%`; document.getElementById("readiness-bar").style.width=pct+"%"; }
+function setPaperSize(sz, silent=false) { paperSize=sz; document.getElementById("sz-letter").classList.toggle("active",sz==="letter"); document.getElementById("sz-a4").classList.toggle("active",sz==="a4"); document.getElementById("dynamic-page-size").textContent = sz==="letter" ? "@page { size: letter portrait; margin: 0.25in; }" : "@page { size: A4 portrait; margin: 10mm; }"; if(!silent) saveAll(); }
+function switchTab(id, btn) { document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active")); document.querySelectorAll(".nav-tab").forEach(b=>b.classList.remove("active")); document.getElementById(id).classList.add("active"); btn.classList.add("active"); if(id==="t-print") renderPrintStage(currentPrintMode); }
+function renderPrintStage(mode) {
+  currentPrintMode=mode; const fam=esc((store["b-family"]||"OUR").toUpperCase()), upd=esc(store["b-date"]||new Date().toISOString().slice(0,10)), nxt=esc(getNextReviewDate(store["b-date"]));
+  let html="";
+  if (mode==="full") {
+    html += `<div class="print-page"><div class="cover-box"><div><div class="cover-kicker">Household Preparedness & Peace of Mind</div><div class="cover-title">IN CASE OF EMERGENCY<br>(ICE) FAMILY BINDER</div><div class="cover-sub">Essential Medical, Financial, Digital, Insurance, Legal & Caregiver Instructions</div></div><div class="cover-family">THE ${fam} FAMILY</div><div class="cover-meta"><strong>Primary Residence:</strong> ${v("b-addr")}<br><strong>Where Kept:</strong> ${v("b-loc")}<br><strong>Last Updated:</strong> ${upd} &nbsp;|&nbsp; <strong>Next Review:</strong> ${nxt}</div></div></div>`;
+    const secs = [
+      ["Section 1: Immediate Emergency & Home Utility Shut-Offs", "Emergency: 911 (US/CA) • 999 (UK) • 112 (EU) • US Poison Control: 1-800-222-1222", [["Main Water Shut-Off", v("s1-water")],["Electrical Breaker Box", v("s1-elec")],["Main Gas Valve & Wrench", v("s1-gas")],["Alarm / Smart Lock Hint", v("s1-alarm")],["Emergency Contact #1", v("s1-c1")],["Emergency Contact #2 / Keys", v("s1-c2")]]],
+      ["Section 2: Medical & Health Vault", "Blood types, allergies, daily meds, US RxBIN/RxPCN pharmacy codes & HIPAA / Medical POA.", [["Member #1", `<strong>${v("m1-name")}</strong><br>${v("m1-meds")}`],["Member #2", `<strong>${v("m2-name")}</strong><br>${v("m2-meds")}`],["Member #3", `<strong>${v("m3-name")}</strong><br>${v("m3-meds")}`],["Member #4", `<strong>${v("m4-name")}</strong><br>${v("m4-meds")}`],["Health Insurance", v("s2-ins")],["Pharmacy RxBIN / RxPCN", v("s2-rx")],["Dental, Vision & HSA/FSA", v("s2-den")],["HIPAA & Medical POA", v("s2-hipaa")]]],
+      ["Section 3: Digital Life & Safe Access", "Zero-Plaintext Protocol: NEVER write raw passwords on paper.", [["Password Manager", v("s3-pm")],["Master Password Clue", v("s3-hint")],["Physical Recovery Key", v("s3-key")],["2FA Device & Codes", v("s3-2fa")],["Apple Legacy Contact", v("s3-apple")],["Google Inactive Manager", v("s3-google")]]],
+      ["Section 4: Banking, Investments & Debts", "Institution names and LAST 4 DIGITS only.", [["Checking & HYSA", v("s4-bank")],["Retirement (401k/IRA)", v("s4-ret")],["Brokerage & Safe Box", v("s4-inv")],["Mortgage, Loans & Cards", v("s4-debt")]]],
+      ["Section 5: Insurance Policies", "Audit Primary & Contingent beneficiaries every 6 months.", [["Life Insurance", v("s5-life")],["Home & Auto Insurance", v("s5-home")],["Umbrella / Disability / LTC", v("s5-umb")],["Insurance Agent", v("s5-agent")]]],
+      ["Section 6: Monthly Bills & Auto-Pay Continuity", "Ensures mortgage, utilities & cloud access never lapse.", [["Mortgage / Rent", v("s6-mort")],["Electric, Gas & Water", v("s6-util")],["Internet, Mobile & Cloud", v("s6-net")],["Manual Bills (Action Needed!)", v("s6-man")]]],
+      ["Section 7: Property, Vehicles & Legal Originals", "Exact physical locations of original vital records.", [["Will, Trust & Financial POA", v("s7-will")],["Birth/Marriage Certs & Passports", v("s7-id")],["Deed, Survey & Vehicle Titles", v("s7-prop")],["Attorney, CPA & Advisor", v("s7-adv")]]],
+      ["Section 8: Kids, Pets & Caregiver Instructions", `Last Updated ${upd} | Next Semi-Annual Review ${nxt}`, [["School & Authorized Pickup", v("s8-sch")],["Short & Long-Term Guardians", v("s8-grd")],["Pets (Chip, Diet & Meds)", v("s8-pet")],["24/7 Emergency Vet & Sitter", v("s8-vet")]]]
+    ];
+    secs.forEach(([t, s, rows]) => { html += `<div class="print-page"><h2>${t}</h2><p class="sub">${s}</p><table>${rows.map(([k,val])=>`<tr><th>${k}</th><td>${val}</td></tr>`).join("")}</table></div>`; });
+  }
+  if (mode==="full" || mode==="wallet") {
+    const members=[{n:v("m1-name","Name / DOB / Blood"),m:v("m1-meds","Allergies & Meds")},{n:v("m2-name","Name / DOB / Blood"),m:v("m2-meds","Allergies & Meds")},{n:v("m3-name","Name / DOB / Blood"),m:v("m3-meds","Allergies & Meds")},{n:v("m4-name","Name / DOB / Blood"),m:v("m4-meds","Allergies & Meds")}];
+    html += `<div class="print-page"><h2>Printable Wallet ICE Medical Cards (Cut Along Dashed Lines)</h2><p class="sub">Exact credit card size (3.375" x 2.125"). Cut out and keep behind your Driver's License.</p><div class="wallet-grid">${members.map((mb,i)=>`<div class="wallet-card"><div class="wc-hdr"><span>IN CASE OF EMERGENCY (ICE)</span><span>CARD #${i+1}</span></div><div class="wc-body"><div><strong>Person:</strong> ${mb.n}</div><div><strong>Medical:</strong> ${mb.m}</div><div><strong>Health Ins:</strong> ${v("s2-ins","Carrier & ID")}</div><div><strong>ICE Contact:</strong> ${v("s1-c1","Primary Contact")}</div><div><strong>Address:</strong> ${v("b-addr","Home Address")}</div></div></div>`).join("")}</div></div>`;
+    html += `<div class="print-page"><h2>First 24 Hours Crisis Action Card (Keep Inside Kitchen Cabinet)</h2><p class="sub">THE ${fam} FAMILY • Updated ${upd} • Binder Location: ${v("b-loc")}</p><table><tr><th>Home Address</th><td>${v("b-addr")}</td></tr><tr><th>Water / Breaker / Gas</th><td>Water: ${v("s1-water")}<br>Breaker: ${v("s1-elec")}<br>Gas: ${v("s1-gas")}</td></tr><tr><th>Contacts & Spare Key</th><td>1) ${v("s1-c1")}<br>2) ${v("s1-c2")}</td></tr><tr><th>Critical Allergies & Meds</th><td>1) ${v("m1-name")} (${v("m1-meds")})<br>2) ${v("m2-name")} (${v("m2-meds")})</td></tr><tr><th>Health Ins & RxBIN</th><td>${v("s2-ins")} | ${v("s2-rx")}</td></tr><tr><th>Password Mgr & Key Loc</th><td>${v("s3-pm")} | Key: ${v("s3-key")}</td></tr><tr><th>Kids Pickup & 24/7 Vet</th><td>School: ${v("s8-sch")}<br>Vet: ${v("s8-vet")}</td></tr></table></div>`;
+  }
+  if (mode==="spines") {
+    html += `<div class="print-page spines-page"><h2>True 1:1 Scale Binder Spine Inserts (1", 1.5" and 2")</h2><p class="sub">Print at 100% scale ("Actual Size"), cut along dashed border, and slide into your clear 3-ring view binder spine.</p><div class="spines-wrap"><div class="spine s1">ICE FAMILY BINDER • THE ${fam} FAMILY <small>1-INCH SPINE • UPDATED ${upd}</small></div><div class="spine s15">ICE FAMILY BINDER • THE ${fam} FAMILY <small>1.5-INCH SPINE • MEDICAL • FINANCIAL • LEGAL • HOME</small></div><div class="spine s2">ICE FAMILY BINDER • THE ${fam} FAMILY <small>2-INCH SPINE • OPEN IMMEDIATELY IN AN EMERGENCY</small></div></div></div>`;
+  }
+  if (mode==="dividers") {
+    const divs=[["Section 01","Immediate Emergency & Home Shut-Offs","Emergency contacts, spare keys, alarm hints & water/gas/breaker shut-offs."],["Section 02","Medical & Health Vault","Family blood types, allergies, meds, RxBIN/RxPCN & HIPAA / Medical POA."],["Section 03","Digital Life & Safe Access","Zero-Plaintext password hints, recovery key locations & Apple/Google Legacy."],["Section 04","Banking, Investments & Debts","Checking, HYSA, 401(k)/IRA, brokerage, mortgage, credit cards & safe box."],["Section 05","Insurance Policies","Life, home/renters, auto, umbrella, disability policies & agent contacts."],["Section 06","Monthly Bills & Auto-Pay Map","Housing, utilities, internet, mobile, cloud & manual bills."],["Section 07","Property, Vehicles & Legal Originals","Physical locations of Will, Trust, Birth/Marriage Certs, Passports & Deeds."],["Section 08","Kids, Pets & Caregiver Instructions","School pickup authorizations, guardians, pet care & 24/7 emergency vet."]];
+    html += divs.map(([n,t,d])=>`<div class="print-page"><div class="divider-page"><div class="divider-num">${n}</div><div class="divider-title">${t}</div><div class="divider-desc">${d}</div></div></div>`).join("");
+  }
+  document.getElementById("print-stage").innerHTML = html;
+}
+function printBundle(mode) { renderPrintStage(mode); document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("print-active")); document.getElementById("t-print").classList.add("print-active"); window.print(); }
+function downloadICS() {
+  const upd=store["b-date"]||new Date().toISOString().slice(0,10), nxt=getNextReviewDate(upd).replace(/-/g,""), fam=(store["b-family"]||"Family").replace(/[\r\n,;]/g," ");
+  const uid=`ice-review-${nxt}@icefamilybinder.local`;
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//ICE Family Binder 2.1//EN","BEGIN:VEVENT",`UID:${uid}`,`DTSTART;VALUE=DATE:${nxt}`,`DTEND;VALUE=DATE:${nxt}`,`SUMMARY:Semi-Annual ICE Family Binder Review (${fam})`,"DESCRIPTION:15-minute checkup: verify beneficiaries, insurance renewals, meds & auto-pay cards.","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar;charset=utf-8"})); a.download="ICE_Binder_6Month_Review.ics"; a.click();
+}
+function exportJSON() { const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(store,null,2)],{type:"application/json"})); a.download="ICE_Family_Binder_Backup.json"; a.click(); }
+function importJSON(ev) { const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ try{ store=JSON.parse(e.target.result); localStorage.setItem("ice_binder_v21",JSON.stringify(store)); loadAll(); alert("Backup restored."); }catch{ alert("Could not read backup file."); } }; r.readAsText(f); }
+function resetAll() { if(confirm("Erase all locally saved entries from this browser?")) { localStorage.removeItem("ice_binder_v21"); localStorage.removeItem("ice_binder_v2"); location.reload(); } }
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+loadAll();
+</script>
+</body>
+</html>

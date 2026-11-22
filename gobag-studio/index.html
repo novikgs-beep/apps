@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0F766E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>72-Hour Go-Bag Calculator & Fridge-Ready Caregiver Studio 2.1</title>
+<style>
+  :root { --navy: #1B365D; --teal: #0F766E; --bg: #F1F5F9; --card: #fff; --text: #0F172A; --muted: #64748B; --border: #CBD5E1; }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Liberation Sans", Arial, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 60px; }
+  header { background: var(--teal); color: #fff; padding: 14px 16px 10px; position: sticky; top: 0; z-index: 100; }
+  header h1 { margin: 0 0 3px; font-size: 18px; }
+  header p { margin: 0; font-size: 12px; color: #CCFBF1; }
+  .nav-tabs { display: flex; gap: 6px; margin-top: 10px; }
+  .nav-tab { background: rgba(255,255,255,0.16); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .nav-tab.active { background: #fff; color: var(--teal); }
+  .container { max-width: 860px; margin: 0 auto; padding: 14px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .card h2 { margin: 0 0 10px; font-size: 16px; color: var(--navy); }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .grid-4, .grid-2 { grid-template-columns: 1fr 1fr; } }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  input, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; }
+  .summary-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+  .kpi { background: #F0FDFA; border: 1px solid #99F6E4; border-radius: 10px; padding: 10px; text-align: center; }
+  .kpi strong { display: block; font-size: 18px; color: var(--teal); }
+  .kpi span { font-size: 12px; color: var(--muted); }
+  .btn-primary { background: var(--navy); color: #fff; border: none; border-radius: 10px; padding: 11px 16px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-secondary { background: #E2E8F0; color: var(--text); border: none; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .print-sheet { background: #fff; border: 1px solid #94A3B8; padding: 24px; border-radius: 8px; }
+  .print-sheet h2 { text-align: center; color: #1B365D; border-bottom: 2px solid #1B365D; padding-bottom: 6px; margin: 0 0 10px; font-size: 14.5pt; text-transform: uppercase; }
+  .print-sheet table { width: 100%; border-collapse: collapse; font-size: 9.8pt; margin-top: 8px; }
+  .print-sheet th, .print-sheet td { border: 1px solid #64748B; padding: 6.5px 9px; text-align: left; vertical-align: top; word-wrap: break-word; }
+  .print-sheet th { background: #F1F5F9; color: #1B365D; width: 34%; }
+  .disclaimer { font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 16px; padding: 12px; background: #E2E8F0; border-radius: 8px; }
+  @media print {
+    @page { size: letter portrait; margin: 0.4in; }
+    body { background: #fff; padding: 0; }
+    header, .no-print, .disclaimer { display: none !important; }
+    .container { max-width: 100%; padding: 0; }
+    .tab-panel { display: none !important; }
+    .tab-panel.print-active { display: block !important; }
+    .print-sheet { border: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="no-print">
+  <h1>72-Hour Go-Bag Calculator & Caregiver Studio 2.1</h1>
+  <p>100% Private (auto-saves locally on your device) • Auto-sizes 72-Hour supplies + prints a Fridge-Ready Sitter Sheet</p>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('g-bag', this)">1. Smart 72-Hour Go-Bag</button>
+    <button class="nav-tab" onclick="switchTab('g-sitter', this)">2. Fridge-Ready Sitter & Pet Sheet</button>
+  </div>
+</header>
+<div class="container">
+  <section id="g-bag" class="tab-panel active">
+    <div class="card no-print">
+      <h2>Household Size (Auto-Calculates 72-Hour Quantities)</h2>
+      <div class="grid-4">
+        <div><label>Adults</label><input type="number" id="n-ad" value="2" min="0" oninput="recalc()"></div>
+        <div><label>Kids (2-17)</label><input type="number" id="n-kd" value="2" min="0" oninput="recalc()"></div>
+        <div><label>Infants (0-2)</label><input type="number" id="n-in" value="0" min="0" oninput="recalc()"></div>
+        <div><label>Pets</label><input type="number" id="n-pt" value="1" min="0" oninput="recalc()"></div>
+      </div>
+      <div class="summary-strip" id="gb-kpis"></div>
+      <button class="btn-primary" onclick="printSec('g-bag')">Print Customized 72-Hour Go-Bag Checklist</button>
+    </div>
+    <div class="print-sheet" id="gb-list"></div>
+  </section>
+  <section id="g-sitter" class="tab-panel">
+    <div class="card no-print">
+      <h2>Fill In Before Date Night or Travel (Auto-Saved Locally)</h2>
+      <div class="grid-2">
+        <div><label>Home Address & Nearest Cross Streets</label><input id="cg-addr" placeholder="1420 Maple Ln (Cross: Oak & 5th)" oninput="renderSitter()"></div>
+        <div><label>Parents' Cell Phones & Where We Are</label><input id="cg-par" placeholder="Mom: 555-0101 | Dad: 555-0102 | Venue" oninput="renderSitter()"></div>
+        <div><label>Local Emergency Backup Adult (10 mins away)</label><input id="cg-bak" placeholder="Sarah Miller - (512) 555-0192" oninput="renderSitter()"></div>
+        <div><label>Pediatrician & Preferred Urgent Care / ER</label><input id="cg-doc" placeholder="Dr. Patel (555-0144) | St. David's ER" oninput="renderSitter()"></div>
+        <div><label>Children's Allergies & Medical Conditions</label><input id="cg-all" placeholder="Maya: Peanuts (EpiPen in kitchen drawer)" oninput="renderSitter()"></div>
+        <div><label>Meals, Bedtime & School Pickup Rules</label><input id="cg-bed" placeholder="Dinner 6:00 PM | Bedtime 8:00 PM" oninput="renderSitter()"></div>
+        <div><label>Pet Feeding Schedule & Medications</label><input id="cg-pet" placeholder="Bella: 1.5 cups at 7 AM & 6 PM" oninput="renderSitter()"></div>
+        <div><label>24/7 Emergency Vet Clinic</label><input id="cg-vet" placeholder="Austin 24hr Vet - (512) 555-0190" oninput="renderSitter()"></div>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
+        <button class="btn-primary" onclick="printSec('g-sitter')">Print Fridge-Ready Sitter & Pet Sheet</button>
+        <button class="btn-secondary" onclick="exportGB()">Save Local Backup (.json)</button>
+        <button class="btn-secondary" onclick="document.getElementById('imp-gb').click()">Load Backup (.json)</button>
+        <input type="file" id="imp-gb" accept=".json" style="display:none" onchange="importGB(event)">
+        <button class="btn-secondary" style="color:#B91C1C;" onclick="resetGB()">Reset All</button>
+      </div>
+    </div>
+    <div class="print-sheet" id="sitter-preview"></div>
+  </section>
+  <div class="disclaimer no-print">
+    <strong>Legal Disclaimer (hidden when printing):</strong> This tool is for informational and household preparedness purposes only and does not constitute medical, legal, or professional emergency advice. Verify supply quantities and medical instructions independently.
+  </div>
+</div>
+<script>
+const GB_IDS = ["n-ad","n-kd","n-in","n-pt","cg-addr","cg-par","cg-bak","cg-doc","cg-all","cg-bed","cg-pet","cg-vet"];
+function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+let gbStore = JSON.parse(localStorage.getItem("gobag_studio_v21") || localStorage.getItem("gobag_studio_v2") || "{}");
+function saveGB() { GB_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) gbStore[id]=el.value; }); localStorage.setItem("gobag_studio_v21", JSON.stringify(gbStore)); }
+function loadGB() { GB_IDS.forEach(id=>{ const el=document.getElementById(id); if(el && gbStore[id]!==undefined) el.value=gbStore[id]; }); }
+function switchTab(id, btn) { document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active")); document.querySelectorAll(".nav-tab").forEach(b=>b.classList.remove("active")); document.getElementById(id).classList.add("active"); btn.classList.add("active"); }
+function recalc() {
+  saveGB();
+  const ad=Math.max(0,parseInt(document.getElementById("n-ad").value)||0), kd=Math.max(0,parseInt(document.getElementById("n-kd").value)||0), inf=Math.max(0,parseInt(document.getElementById("n-in").value)||0), pt=Math.max(0,parseInt(document.getElementById("n-pt").value)||0);
+  const people=ad+kd+inf, waterGal=Math.max(1,people*3+pt*1), meals=Math.max(3,people*9), cash=Math.max(300,(ad*200)+(kd*50));
+  document.getElementById("gb-kpis").innerHTML = `<div class="kpi"><strong>${waterGal} Gallons</strong><span>Drinking Water (3 Days)</span></div><div class="kpi"><strong>${meals} Meals</strong><span>Non-Perishable Rations</span></div><div class="kpi"><strong>$${cash} Cash</strong><span>Small Bills ($1s, $5s, $20s)</span></div>`;
+  let rows = [
+    ["Water & Food", `${waterGal} gallons of water (or filtration straws) + ${meals} non-perishable meals/protein bars + manual can opener.`],
+    ["5-Minute Grab Folder", `Copies of IDs, passports, insurance cards, $${cash} cash in small bills, spare house & car keys, physical ICE Binder.`],
+    ["First Aid & 7-Day Meds", `7-day supply of prescription meds for ${Math.max(1,people)} person(s), first aid kit, pain relievers, N95 masks (${Math.max(2,people*2)}), ${Math.max(1,people)} thermal blanket(s).`],
+    ["Power, Light & Comms", "20,000 mAh charged power bank, charging cables, LED flashlights + extra batteries, NOAA hand-crank weather radio."],
+    ["Clothing & Hygiene", `${Math.max(1,people)} complete change(s) of clothes, sturdy shoes, rain ponchos, wet wipes, toothbrushes, hand sanitizer.`]
+  ];
+  if (inf>0) rows.push(["Infants & Toddlers", `${inf*30} diapers, wipes, 3-day formula/baby food supply, spare pacifiers, comfort toy, immunization copy.`]);
+  if (pt>0) rows.push(["Pets Evacuation Kit", `3-day supply of food for ${pt} pet(s), collapsible bowls, leash/carrier, vaccination record, recent printed photo.`]);
+  document.getElementById("gb-list").innerHTML = `<h2>72-Hour Family Evacuation Go-Bag Checklist</h2><p style="text-align:center;font-size:10pt;color:#475569;">Customized for ${ad} Adult(s), ${kd} Kid(s), ${inf} Infant(s), ${pt} Pet(s)</p><table><thead><tr><th style="width:6%">[ ]</th><th style="width:26%">Category</th><th>Customized 72-Hour Pack Contents</th></tr></thead><tbody>${rows.map(([c,t])=>`<tr><td style="text-align:center">[ ]</td><td><strong>${c}</strong></td><td>${t}</td></tr>`).join("")}</tbody></table>`;
+}
+function renderSitter() {
+  saveGB();
+  const g = id => { const val=(document.getElementById(id).value||"").trim(); return val ? esc(val) : "______________________________________________________"; };
+  document.getElementById("sitter-preview").innerHTML = `<h2>Fridge-Ready Sitter, Kids & Pet Emergency Sheet</h2><p style="text-align:center;font-size:10pt;color:#B91C1C;font-weight:700;">EMERGENCY: DIAL 911 (US/CA) • POISON CONTROL: 1-800-222-1222</p><table><tr><th>Home Address & Cross Streets</th><td>${g("cg-addr")}</td></tr><tr><th>Parents' Cell Phones & Location</th><td>${g("cg-par")}</td></tr><tr><th>Local Backup Adult (10 mins away)</th><td>${g("cg-bak")}</td></tr><tr><th>Pediatrician & Preferred ER</th><td>${g("cg-doc")}</td></tr><tr><th>Children's Allergies & Meds</th><td>${g("cg-all")}</td></tr><tr><th>Meals, Bedtime & Pickup Rules</th><td>${g("cg-bed")}</td></tr><tr><th>Pet Feeding & Medications</th><td>${g("cg-pet")}</td></tr><tr><th>24/7 Emergency Vet Clinic</th><td>${g("cg-vet")}</td></tr></table>`;
+}
+function printSec(id) { document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("print-active")); document.getElementById(id).classList.add("print-active"); window.print(); }
+function exportGB() { saveGB(); const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(gbStore,null,2)],{type:"application/json"})); a.download="GoBag_Caregiver_Backup.json"; a.click(); }
+function importGB(ev) { const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ try{ gbStore=JSON.parse(e.target.result); localStorage.setItem("gobag_studio_v21",JSON.stringify(gbStore)); loadGB(); recalc(); renderSitter(); alert("Backup restored."); }catch{ alert("Could not read backup file."); } }; r.readAsText(f); }
+function resetGB() { if(confirm("Clear all locally saved Go-Bag and Caregiver entries?")) { localStorage.removeItem("gobag_studio_v21"); localStorage.removeItem("gobag_studio_v2"); location.reload(); } }
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+loadGB(); recalc(); renderSitter();
+</script>
+</body>
+</html>

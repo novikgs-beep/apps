@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1B365D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Помощник новосёла 2.1: Приёмка, Акт, ТЗ и Калькулятор</title>
+<style>
+  :root {
+    --navy: #1B365D; --slate: #2C4D75; --accent: #0F766E; --bg: #F1F5F9; --card: #FFFFFF;
+    --text: #0F172A; --muted: #64748B; --ok: #15803D; --ok-bg: #DCFCE7; --bad: #B91C1C;
+    --bad-bg: #FEE2E2; --na: #475569; --na-bg: #E2E8F0; --border: #CBD5E1;
+  }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Liberation Sans", Arial, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+  header { background: var(--navy); color: #fff; padding: 14px 16px 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.16); }
+  header h1 { margin: 0 0 3px; font-size: 18px; }
+  header p { margin: 0; font-size: 12px; color: #CBD5E1; }
+  .nav-tabs { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .nav-tab { background: rgba(255,255,255,0.12); color: #E2E8F0; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .nav-tab.active { background: #fff; color: var(--navy); }
+  .container { max-width: 860px; margin: 0 auto; padding: 14px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .card h2 { margin: 0 0 10px; font-size: 16px; color: var(--navy); }
+  .card h3 { margin: 14px 0 8px; font-size: 14px; color: var(--slate); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; color: var(--text); }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .mode-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text); }
+  .mode-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .stats-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; font-size: 12px; font-weight: 700; }
+  .stat-pill { background: var(--slate); color: #fff; padding: 5px 11px; border-radius: 999px; }
+  .stat-pill.ok { background: var(--ok); }
+  .stat-pill.bad { background: var(--bad); }
+  .zone-card { background: var(--card); border-radius: 12px; margin-bottom: 14px; border: 1px solid var(--border); overflow: hidden; }
+  .zone-header { background: var(--slate); color: #fff; padding: 11px 14px; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; }
+  .check-item { padding: 12px 14px; border-bottom: 1px solid #E2E8F0; }
+  .check-item:last-child { border-bottom: none; }
+  .item-title { font-size: 14px; font-weight: 600; line-height: 1.35; }
+  .item-norm { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .btn-group { display: flex; gap: 6px; margin-top: 9px; }
+  .st-btn { flex: 1; padding: 8px 6px; border-radius: 8px; border: 1px solid var(--border); background: #F8FAFC; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .st-btn.active-ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok); }
+  .st-btn.active-bad { background: var(--bad-bg); color: var(--bad); border-color: var(--bad); }
+  .st-btn.active-na { background: var(--na-bg); color: var(--na); border-color: var(--na); }
+  .defect-box { margin-top: 8px; display: none; }
+  .defect-box.visible { display: block; }
+  .btn-primary { background: var(--navy); color: #fff; border: none; border-radius: 10px; padding: 11px 16px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-accent { background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 11px 16px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-secondary { background: #E2E8F0; color: var(--text); border: none; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .highlight-box { background: #EBF3FA; border-left: 4px solid var(--navy); padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; }
+  .warn-box { background: #FEF3C7; border-left: 4px solid #D97706; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 12.5px; color: #78350F; }
+  .calc-res { background: #F0FDF4; border: 1px solid #86EFAC; padding: 12px; border-radius: 10px; margin-top: 10px; font-size: 14px; }
+  .calc-res strong { color: #166534; font-size: 16px; }
+  .tz-group { border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px; margin-bottom: 10px; background: #F8FAFC; }
+  .tz-opt { display: flex; align-items: flex-start; gap: 8px; margin: 6px 0; font-size: 13.5px; cursor: pointer; }
+  .tz-opt input { width: auto; margin-top: 3px; }
+  .print-doc { background: #fff; border: 1px solid #94A3B8; padding: 24px; border-radius: 8px; font-family: "Times New Roman", "Liberation Serif", "DejaVu Serif", Georgia, serif; color: #000; font-size: 12pt; line-height: 1.35; }
+  .print-doc h2 { text-align: center; font-size: 14pt; color: #000; margin: 0 0 8px; text-transform: uppercase; }
+  .print-doc p { margin: 5px 0; }
+  .print-doc table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10.5pt; }
+  .print-doc th, .print-doc td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: top; }
+  .print-doc th { background: #F1F5F9; font-weight: bold; }
+  .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px; font-size: 11pt; }
+  .disclaimer { font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 16px; padding: 12px; background: #E2E8F0; border-radius: 8px; }
+  @media print {
+    @page { size: A4 portrait; margin: 15mm; }
+    body { background: #fff; padding: 0; margin: 0; }
+    header, .no-print, .disclaimer, .warn-box, .btn-row { display: none !important; }
+    .container { max-width: 100%; padding: 0; margin: 0; }
+    .tab-panel { display: none !important; }
+    .tab-panel.print-active { display: block !important; }
+    .card { border: none; padding: 0; margin: 0; box-shadow: none; }
+    .print-doc { border: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="no-print">
+  <h1>Помощник новосёла 2.1</h1>
+  <p>Работает офлайн на iPhone, Android и ПК • Введите данные один раз, печатайте чистые документы А4</p>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('tab-obj', this)">1. Объект и ДДУ</button>
+    <button class="nav-tab" onclick="switchTab('tab-check', this)">2. Чек-лист приёмки</button>
+    <button class="nav-tab" onclick="switchTab('tab-act', this)">3. Акт осмотра (А4)</button>
+    <button class="nav-tab" onclick="switchTab('tab-tz', this)">4. Конструктор ТЗ</button>
+    <button class="nav-tab" onclick="switchTab('tab-calc', this)">5. Калькулятор</button>
+  </div>
+</header>
+<div class="container">
+  <section id="tab-obj" class="tab-panel active">
+    <div class="card">
+      <h2>Карточка объекта (подставляется в Акт осмотра и ТЗ автоматически)</h2>
+      <div class="grid-2">
+        <div><label>ФИО участника долевого строительства (Заказчика)</label><input type="text" id="m-fio" placeholder="Иванов Иван Иванович" oninput="saveMeta()"></div>
+        <div><label>Паспортные данные (серия, номер, кем и когда выдан)</label><input type="text" id="m-pass" placeholder="45 12 № 123456, выдан МВД..." oninput="saveMeta()"></div>
+        <div><label>Наименование застройщика (и ИНН)</label><input type="text" id="m-dev" placeholder="ООО СЗ «Пример-Строй»" oninput="saveMeta()"></div>
+        <div><label>Договор долевого участия (№ и дата)</label><input type="text" id="m-ddu" placeholder="№ ДДУ-123/2025 от 15.03.2025" oninput="saveMeta()"></div>
+        <div><label>Адрес объекта (ЖК, корпус, этаж, кв. №)</label><input type="text" id="m-addr" placeholder="г. Москва, ЖК Солнечный, корп. 2, кв. 145" oninput="saveMeta()"></div>
+        <div><label>Дата осмотра</label><input type="date" id="m-date" oninput="saveMeta()"></div>
+      </div>
+      <h3>Контроль площади и перерасчёт с застройщиком</h3>
+      <div class="grid-3">
+        <div><label>Площадь по ДДУ (м²)</label><input type="number" step="0.01" id="m-area-ddu" placeholder="63.40" oninput="saveMeta()"></div>
+        <div><label>Фактическая площадь (м²)</label><input type="number" step="0.01" id="m-area-fact" placeholder="62.10" oninput="saveMeta()"></div>
+        <div><label>Цена 1 м² по ДДУ (₽)</label><input type="number" step="100" id="m-price-m2" placeholder="210000" oninput="saveMeta()"></div>
+      </div>
+      <div class="highlight-box" id="area-diff-box">Введите площади по ДДУ и факту, чтобы увидеть расхождение и сумму возврата или доплаты.</div>
+      <h3>Резервная копия данных</h3>
+      <p style="font-size:13px;color:var(--muted);margin:4px 0 8px;">Все данные хранятся локально на вашем устройстве. Вы можете сохранить копию в JSON и открыть на ПК для печати.</p>
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="exportBackup()">Скачать резервную копию (.json)</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">Загрузить из файла (.json)</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
+        <button class="btn-secondary" style="color:#B91C1C;" onclick="resetAll()">Сбросить все данные</button>
+      </div>
+    </div>
+  </section>
+  <section id="tab-check" class="tab-panel">
+    <div class="card no-print">
+      <h2>Тип сдачи квартиры от застройщика</h2>
+      <p style="font-size:12.5px;color:var(--muted);margin:0 0 8px;">Выберите вариант сдачи: лишние пункты автоматически скроются, чтобы не мешать на осмотре.</p>
+      <div class="pill-row">
+        <button class="mode-btn" id="mode-concrete" onclick="setFinishMode('concrete')">Без отделки (Бетон)</button>
+        <button class="mode-btn" id="mode-whitebox" onclick="setFinishMode('whitebox')">Предчистовая (White Box)</button>
+        <button class="mode-btn" id="mode-finished" onclick="setFinishMode('finished')">С чистовой отделкой</button>
+      </div>
+      <div class="stats-bar">
+        <span class="stat-pill" id="stat-total">Проверено: 0/0</span>
+        <span class="stat-pill ok" id="stat-ok">Норма: 0</span>
+        <span class="stat-pill bad" id="stat-bad">Дефекты: 0</span>
+      </div>
+      <div class="pill-row">
+        <button class="mode-btn active" onclick="setFilter('all', this)">Все пункты</button>
+        <button class="mode-btn" onclick="setFilter('bad', this)">Только дефекты</button>
+        <button class="mode-btn" onclick="setFilter('todo', this)">Не проверено</button>
+      </div>
+    </div>
+    <div id="checklist-root"></div>
+  </section>
+  <section id="tab-act" class="tab-panel">
+    <div class="warn-box no-print"><strong>Готово к печати:</strong> при нажатии кнопки «Печать / Сохранить PDF (А4)» верхнее меню, кнопки и дисклеймер автоматически скроются.</div>
+    <div class="btn-row no-print" style="margin-bottom:12px;">
+      <button class="btn-primary" onclick="printSection('tab-act')">Печать / Сохранить PDF (А4)</button>
+      <button class="btn-secondary" onclick="copyActText()">Скопировать перечень дефектов текстом</button>
+    </div>
+    <div class="print-doc" id="act-print-area"></div>
+  </section>
+  <section id="tab-tz" class="tab-panel">
+    <div class="card no-print">
+      <h2>Конструктор Технического задания для бригады</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 12px;">Отметьте нужные требования галочками и при желании добавьте свои. Внизу соберётся чистый бланк А4 и текст для Telegram/WhatsApp.</p>
+      <div id="tz-builder-root"></div>
+      <div style="margin-top:10px;">
+        <label>Дополнительные требования заказчика (свои пункты, материалы, особые условия)</label>
+        <textarea id="tz-custom" rows="3" placeholder="Например: ниша под робот-пылесос в прихожей; вывод воды под измельчитель на кухне." oninput="saveTZCustom()"></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="printSection('tab-tz')">Печать ТЗ / Сохранить PDF (А4)</button>
+        <button class="btn-accent" onclick="copyTZMessenger()">Скопировать ТЗ для Telegram / WhatsApp</button>
+      </div>
+    </div>
+    <div class="print-doc" id="tz-print-area"></div>
+  </section>
+  <section id="tab-calc" class="tab-panel">
+    <div class="card">
+      <h2>Быстрый калькулятор материалов и веса груза (для строймагазина)</h2>
+      <h3>1. Плитка и керамогранит</h3>
+      <div class="grid-3">
+        <div><label>Чистая площадь (м²)</label><input type="number" id="c-tile-area" value="32" min="0" oninput="calcAll()"></div>
+        <div><label>Запас на подрезку (%)</label><select id="c-tile-waste" onchange="calcAll()"><option value="10">10% (прямая укладка)</option><option value="15" selected>15% (диагональ / ёлочка)</option></select></div>
+        <div><label>Площадь в 1 упаковке (м²)</label><input type="number" step="0.01" id="c-tile-pack" value="1.44" min="0.05" oninput="calcAll()"></div>
+      </div>
+      <div class="calc-res" id="res-tile"></div>
+      <h3>2. Ламинат / Кварцвинил SPC</h3>
+      <div class="grid-3">
+        <div><label>Чистая площадь пола (м²)</label><input type="number" id="c-fl-area" value="48" min="0" oninput="calcAll()"></div>
+        <div><label>Запас (%)</label><select id="c-fl-waste" onchange="calcAll()"><option value="7" selected>7% (прямая)</option><option value="10">10% (диагональ)</option><option value="15">15% (ёлочка)</option></select></div>
+        <div><label>Площадь в 1 упаковке (м²)</label><input type="number" step="0.01" id="c-fl-pack" value="2.13" min="0.05" oninput="calcAll()"></div>
+      </div>
+      <div class="calc-res" id="res-floor"></div>
+      <h3>3. Гипсовая штукатурка по маякам (мешки по 30 кг)</h3>
+      <div class="grid-3">
+        <div><label>Площадь стен (м²)</label><input type="number" id="c-pl-area" value="165" min="0" oninput="calcAll()"></div>
+        <div><label>Средняя толщина слоя (мм)</label><input type="number" id="c-pl-thick" value="18" min="0" oninput="calcAll()"></div>
+        <div><label>Расход на 1 м² при 1 мм (кг)</label><input type="number" step="0.05" id="c-pl-rate" value="0.9" min="0.1" oninput="calcAll()"></div>
+      </div>
+      <div class="calc-res" id="res-plaster"></div>
+      <h3>4. Интерьерная краска</h3>
+      <div class="grid-3">
+        <div><label>Площадь покраски (м²)</label><input type="number" id="c-pt-area" value="85" min="0" oninput="calcAll()"></div>
+        <div><label>Количество слоёв</label><input type="number" id="c-pt-layers" value="2" min="1" oninput="calcAll()"></div>
+        <div><label>Укрывистость (м² с 1 л в 1 слой)</label><input type="number" step="0.5" id="c-pt-cov" value="9.5" min="0.5" oninput="calcAll()"></div>
+      </div>
+      <div class="calc-res" id="res-paint"></div>
+    </div>
+  </section>
+  <div class="disclaimer no-print">
+    <strong>Правовая информация (не выводится на печать):</strong> Материал носит информационно-справочный характер и не является индивидуальной строительно-технической или юридической консультацией. Проверяйте ссылки на СП, ГОСТ и 214-ФЗ с учётом условий вашего ДДУ.
+  </div>
+</div>
+<script>
+const ZONES = [
+  { name: "1. Входная дверь и замки", items: [
+    { id: "d1", modes: ["concrete","whitebox","finished"], title: "Геометрия дверного полотна и коробки", norm: "Отсутствие царапин, вмятин, перекосов; дверь не открывается самопроизвольно." },
+    { id: "d2", modes: ["concrete","whitebox","finished"], title: "Плотность прилегания уплотнителей", norm: "Контур уплотнителя целый по всему периметру, нет сквозняка из подъезда." },
+    { id: "d3", modes: ["concrete","whitebox","finished"], title: "Работа замков, задвижки и ручек", norm: "Ключи поворачиваются плавно без заеданий и люфта; полный комплект ключей." },
+    { id: "d4", modes: ["concrete","whitebox","finished"], title: "Заполнение монтажного шва коробки", norm: "Пена без сквозных пустот, коробка жёстко закреплена анкерами." }
+  ]},
+  { name: "2. Стены, пол и потолок (Геометрия и стяжка)", items: [
+    { id: "g1", modes: ["whitebox","finished"], title: "Отклонение оштукатуренных стен от вертикали", norm: "СП 71.13330.2017: не более 2 мм на 1 м высоты для улучшенной штукатурки (до 10 мм на этаж)." },
+    { id: "g2", modes: ["whitebox","finished"], title: "Неровности плоскости стен под правило 2 м", norm: "СП 71.13330.2017: не более 2-3 плавных неровностей глубиной до 2 мм на 2 м." },
+    { id: "g3", modes: ["whitebox","finished"], title: "Трещины, отслоения и пустоты штукатурки", norm: "При простукивании нет глухого звука; отсутствие усадочных и сквозных трещин." },
+    { id: "g4", modes: ["concrete","whitebox","finished"], title: "Ровность стяжки пола (под рейку 2 м)", norm: "СП 71.13330.2017 (табл. 8.5): просвет под 2-метровой рейкой не более 4 мм для цементно-песчаной стяжки (2 мм под тонкослойные покрытия)." },
+    { id: "g5", modes: ["concrete","whitebox","finished"], title: "Отсутствие бухтения, трещин и наличие демпферной ленты", norm: "Нет отслоений от плиты при простукивании; демпферная лента уложена по периметру стен." },
+    { id: "g6", modes: ["concrete","whitebox","finished"], title: "Гидроизоляция пола в мокрых зонах", norm: "Сплошной ковёр гидроизоляции в санузлах с заводом на стены 150-200 мм (если по ДДУ)." },
+    { id: "g7", modes: ["concrete","whitebox"], title: "Плиты перекрытия потолка и русты", norm: "Отсутствие протечек, оголённой арматуры и сквозных отверстий в межэтажных швах." }
+  ]},
+  { name: "3. Окна и балконное остекление", items: [
+    { id: "w1", modes: ["concrete","whitebox","finished"], title: "Отсутствие окалин, царапин и трещин на стёклах", norm: "ГОСТ 24866 / ГОСТ 30674: осмотр с 0,6-1 м при дневном свете; окалины от сварки требуют замены пакета." },
+    { id: "w2", modes: ["concrete","whitebox","finished"], title: "Прижим створок по периметру (тест листом А4)", norm: "Лист бумаги зажимается плотно и вытягивается с усилием во всех точках притвора." },
+    { id: "w3", modes: ["concrete","whitebox","finished"], title: "Работа фурнитуры и режимов открывания", norm: "Поворотный, откидной режимы и микропроветривание работают без трения створок о раму." },
+    { id: "w4", modes: ["concrete","whitebox","finished"], title: "Дренажные отверстия и наружные отливы", norm: "Наличие дренажных пазов в нижней части рамы, уклон наружного отлива от окна." },
+    { id: "w5", modes: ["concrete","whitebox","finished"], title: "Паро- и гидроизоляция монтажного шва", norm: "ГОСТ 30971: отсутствие продувания по периметру рамы и под подоконником." },
+    { id: "w6", modes: ["concrete","whitebox","finished"], title: "Остекление и ограждение балкона/лоджии", norm: "Надёжность крепления парапета, отсутствие щелей и протечек по верхнему козырьку." }
+  ]},
+  { name: "4. Электрика и слаботочные сети", items: [
+    { id: "e1", modes: ["concrete","whitebox","finished"], title: "Комплектация и маркировка электрощита", norm: "ПУЭ: соответствие автоматов сечению кабеля, наличие УЗО/дифавтоматов, схема групп." },
+    { id: "e2", modes: ["whitebox","finished"], title: "Напряжение, фазировка и заземление во всех розетках", norm: "Проверка тестером розеток: 220-230 В, исправный контур заземления (PE)." },
+    { id: "e3", modes: ["concrete","whitebox","finished"], title: "Срабатывание кнопки «Тест» на УЗО", norm: "При нажатии «Тест» УЗО мгновенно отключает питание защищаемой группы." },
+    { id: "e4", modes: ["concrete","whitebox","finished"], title: "Вывод силового кабеля под электроплиту / варочную", norm: "Наличие кабеля соответствующего сечения (обычно 3х6 мм²) и автомата 32-40 А." },
+    { id: "e5", modes: ["whitebox","finished"], title: "Освещение, выключатели и звонок", norm: "Все линии под напряжением, выключатели не искрят, звонок исправен." },
+    { id: "e6", modes: ["concrete","whitebox","finished"], title: "Ввод оптоволокна/витой пары и домофона", norm: "Целостность слаботочного кабеля в прихожей и наличие трубки/вывода домофона." }
+  ]},
+  { name: "5. Водоснабжение и канализация", items: [
+    { id: "p1", modes: ["concrete","whitebox","finished"], title: "Счётчики ХВС и ГВС: паспорта и пломбы", norm: "Совпадение заводских номеров с паспортами, наличие пломб и актуальной даты поверки." },
+    { id: "p2", modes: ["concrete","whitebox","finished"], title: "Запорные краны, фильтры и редукторы", norm: "Шаровые краны плавно перекрывают воду без подтёков, редукторы давления установлены." },
+    { id: "p3", modes: ["concrete","whitebox","finished"], title: "Отсутствие течей и конденсата на стояках", norm: "Сухие резьбовые соединения и муфты, наличие теплоизоляции на трубах." },
+    { id: "p4", modes: ["concrete","whitebox","finished"], title: "Высота тройника канализации от стяжки", norm: "СП 30.13330: раструб расположен достаточно низко для соблюдения уклона труб от ванны/душа." },
+    { id: "p5", modes: ["concrete","whitebox","finished"], title: "Целостность стояка канализации и ревизии", norm: "Отсутствие трещин на трубах, наличие заглушек на всех отводах." }
+  ]},
+  { name: "6. Вентиляция и отопление", items: [
+    { id: "v1", modes: ["concrete","whitebox","finished"], title: "Наличие тяги в вентканалах (кухня и санузлы)", norm: "СП 60.13330: лист бумаги или анемометр фиксирует тягу при приоткрытом окне; нет обратной тяги." },
+    { id: "v2", modes: ["concrete","whitebox","finished"], title: "Отсутствие строительного мусора в вентшахте", norm: "Вентиляционное отверстие не замуровано раствором и обрезками утеплителя." },
+    { id: "v3", modes: ["concrete","whitebox","finished"], title: "Горизонтальность и крепление радиаторов", norm: "Уровень без обратного уклона, зазор от стены не менее 20-30 мм, от пола 60-100 мм." },
+    { id: "v4", modes: ["concrete","whitebox","finished"], title: "Терморегуляторы и арматура радиаторов", norm: "Наличие термоголовок и кранов Маевского, отсутствие сколов эмали и подтёков." },
+    { id: "v5", modes: ["concrete","whitebox","finished"], title: "Гильзы в местах прохода труб через перекрытия", norm: "Трубы отопления в полу/перекрытии защищены гофрой или гильзой." }
+  ]},
+  { name: "7. Чистовая отделка от застройщика", items: [
+    { id: "f1", modes: ["finished"], title: "Обои / покраска стен", norm: "Нет отслоений, пузырей, расхождения швов, пятен и разнотона при дневном свете." },
+    { id: "f2", modes: ["finished"], title: "Напольные покрытия (ламинат / линолеум / плитка)", norm: "Нет скрипов, прогибов, сколов на замках, щелей у плинтусов; плитка не бухтит." },
+    { id: "f3", modes: ["finished"], title: "Межкомнатные двери и наличники", norm: "Полотна не задевают коробку, магнитные замки и ручки срабатывают чётко." },
+    { id: "f4", modes: ["finished"], title: "Натяжные или окрашенные потолки", norm: "Полотно без провисаний, порезов и складок; примыкание к стенам аккуратное." },
+    { id: "f5", modes: ["finished"], title: "Чистовая сантехника (ванна, унитаз, смесители)", norm: "Нет сколов эмали, герметик без разрывов, сифоны не подтекают при полном спуске." }
+  ]},
+  { name: "8. Пожарная безопасность, МОП и обмеры", items: [
+    { id: "m1", modes: ["concrete","whitebox","finished"], title: "Пожарные извещатели и внутриквартирный кран", norm: "Датчики дыма установлены, пожарный рукав укомплектован (если по проекту)." },
+    { id: "m2", modes: ["concrete","whitebox","finished"], title: "Сверка фактической площади с данными ДДУ", norm: "Контрольный обмер лазерным дальномером по всем помещениям." },
+    { id: "m3", modes: ["concrete","whitebox","finished"], title: "Состояние подъезда, лифтов, кладовой и паркинга", norm: "Отсутствие протечек в кладовой/подвале, исправность лифта, наличие магнитных ключей." }
+  ]}
+];
+const TZ_PRESETS = [
+  { group: "1. Геометрия стен и перегородки", items: [
+    { id: "tz1", text: "Вывод углов строго под 90 градусов в зонах кухни, встроенных шкафов и санузлов; в остальных зонах штукатурка по маякам в плоскость.", def: true },
+    { id: "tz2", text: "Перегородки с заполнением акустической минеральной ватой (шумоизоляция санузлов и спальни).", def: false }
+  ]},
+  { group: "2. Стяжка и напольные покрытия", items: [
+    { id: "tz3", text: "Выход в единый уровень чистового пола без порожков по всей квартире.", def: true },
+    { id: "tz4", text: "Занижение уровня пола в санузлах на 15-20 мм либо устройство гидроизоляционного порога.", def: true }
+  ]},
+  { group: "3. Электрика и слаботочные сети", items: [
+    { id: "tz5", text: "Единые высоты от чистового пола: розетки 300 мм, выключатели 900 мм, фартук кухни 1050-1150 мм.", def: true },
+    { id: "tz6", text: "Мастер-выключатель света у входной двери (кроме холодильника, роутера и систем защиты).", def: true },
+    { id: "tz7", text: "Сборка щитка с реле напряжения, УЗО/дифавтоматами и понятной печатной маркировкой всех групп.", def: true },
+    { id: "tz8", text: "Прокладка витой пары (UTP) от щитка/роутера к ТВ-зонам и рабочему столу.", def: false }
+  ]},
+  { group: "4. Сантехника и отопление", items: [
+    { id: "tz9", text: "Коллекторная разводка водоснабжения трубами PEX-a с фильтрами тонкой очистки и редукторами давления.", def: true },
+    { id: "tz10", text: "Установка системы защиты от протечек с электроприводами на вводных кранах.", def: true },
+    { id: "tz11", text: "Монтаж проточного водонагревателя и гигиенического душа с термостатом.", def: false }
+  ]},
+  { group: "5. Плитка, потолки, двери и скрытые работы", items: [
+    { id: "tz12", text: "Запил наружных углов плитки под 45 градусов (заусовка) или алюминиевый профиль; эпоксидная затирка в душевой.", def: true },
+    { id: "tz13", text: "Обязательная фотофиксация всех скрытых работ (кабели, трубы, гидроизоляция) с рулеткой до зашивки.", def: true },
+    { id: "tz14", text: "Высота дверных проёмов 2060-2070 мм от чистового пола под стандартное полотно 2000 мм.", def: true },
+    { id: "tz15", text: "Закладные в потолке под встроенные шкафы-купе и скрытые ниши с подсветкой для штор.", def: false }
+  ]}
+];
+function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+let state = JSON.parse(localStorage.getItem("novosel_v21") || localStorage.getItem("novosel_v2") || "{}");
+if (!state.finishMode) state.finishMode = "whitebox";
+if (!state.tz) { state.tz = {}; TZ_PRESETS.forEach(g => g.items.forEach(it => state.tz[it.id] = it.def)); }
+let currentFilter = "all";
+function saveState() { localStorage.setItem("novosel_v21", JSON.stringify(state)); }
+function switchTab(tabId, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+  document.getElementById(tabId).classList.add("active"); btn.classList.add("active");
+  if (tabId === "tab-act") renderAct();
+  if (tabId === "tab-tz") renderTZPrint();
+}
+function saveMeta() {
+  state.meta = { fio: vId("m-fio"), pass: vId("m-pass"), dev: vId("m-dev"), ddu: vId("m-ddu"), addr: vId("m-addr"), date: vId("m-date"), areaDdu: vId("m-area-ddu"), areaFact: vId("m-area-fact"), priceM2: vId("m-price-m2") };
+  saveState(); updateAreaCalc();
+}
+function vId(id) { return document.getElementById(id).value; }
+function loadMeta() {
+  const m = state.meta || {};
+  ["fio","pass","dev","ddu","addr","areaDdu","areaFact","priceM2"].forEach(k => {
+    const map = {fio:"m-fio",pass:"m-pass",dev:"m-dev",ddu:"m-ddu",addr:"m-addr",areaDdu:"m-area-ddu",areaFact:"m-area-fact",priceM2:"m-price-m2"};
+    document.getElementById(map[k]).value = m[k] || "";
+  });
+  document.getElementById("m-date").value = m.date || new Date().toISOString().slice(0,10);
+  document.getElementById("tz-custom").value = state.tzCustom || "";
+  updateAreaCalc();
+}
+function updateAreaCalc() {
+  const ddu = parseFloat(vId("m-area-ddu")), fact = parseFloat(vId("m-area-fact")), price = parseFloat(vId("m-price-m2")) || 0;
+  const box = document.getElementById("area-diff-box");
+  if (isNaN(ddu) || isNaN(fact)) { box.innerHTML = "Введите площади по ДДУ и факту, чтобы увидеть расхождение и сумму возврата или доплаты."; return; }
+  const diff = +(fact - ddu).toFixed(2);
+  const money = Math.abs(Math.round(diff * price)).toLocaleString("ru-RU");
+  if (diff < 0) box.innerHTML = `<strong>Фактическая площадь меньше на ${Math.abs(diff)} м².</strong>` + (price ? ` Ориентировочный возврат от застройщика: <strong>${money} ₽</strong>.` : "");
+  else if (diff > 0) box.innerHTML = `<strong>Фактическая площадь больше на +${diff} м².</strong>` + (price ? ` Возможная доплата: <strong>${money} ₽</strong>.` : "");
+  else box.innerHTML = "<strong>Площадь полностью совпадает с ДДУ (расхождение 0 м²).</strong>";
+}
+function setFinishMode(mode) {
+  state.finishMode = mode; saveState();
+  ["concrete","whitebox","finished"].forEach(m => document.getElementById("mode-"+m).classList.toggle("active", m === mode));
+  renderChecklist();
+}
+function setFilter(f, btn) {
+  currentFilter = f; btn.parentElement.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); renderChecklist();
+}
+function setStatus(id, st) {
+  if (!state.items) state.items = {}; if (!state.items[id]) state.items[id] = {};
+  state.items[id].status = st; saveState(); renderChecklist();
+}
+function setNote(id, val) {
+  if (!state.items) state.items = {}; if (!state.items[id]) state.items[id] = {};
+  state.items[id].note = val; saveState();
+}
+function renderChecklist() {
+  const root = document.getElementById("checklist-root"); root.innerHTML = "";
+  let total = 0, checked = 0, ok = 0, bad = 0;
+  ZONES.forEach(zone => {
+    const modeItems = zone.items.filter(it => it.modes.includes(state.finishMode));
+    modeItems.forEach(it => { total++; const st = state.items && state.items[it.id] ? state.items[it.id].status : null; if (st) checked++; if (st==="ok") ok++; if (st==="bad") bad++; });
+    const filtered = modeItems.filter(it => { const st = state.items && state.items[it.id] ? state.items[it.id].status : null; if (currentFilter==="bad") return st==="bad"; if (currentFilter==="todo") return !st; return true; });
+    if (!filtered.length) return;
+    const card = document.createElement("div"); card.className = "zone-card";
+    card.innerHTML = `<div class="zone-header"><span>${zone.name}</span><span>${filtered.length} п.</span></div>`;
+    filtered.forEach(it => {
+      const data = (state.items && state.items[it.id]) || {}; const st = data.status || ""; const note = esc(data.note || "");
+      const row = document.createElement("div"); row.className = "check-item";
+      row.innerHTML = `<div class="item-title">${it.title}</div><div class="item-norm">${it.norm}</div>
+        <div class="btn-group">
+          <button class="st-btn ${st==='ok'?'active-ok':''}" onclick="setStatus('${it.id}','ok')">Норма</button>
+          <button class="st-btn ${st==='bad'?'active-bad':''}" onclick="setStatus('${it.id}','bad')">Дефект</button>
+          <button class="st-btn ${st==='na'?'active-na':''}" onclick="setStatus('${it.id}','na')">Не прим.</button>
+        </div>
+        <div class="defect-box ${st==='bad'?'visible':''}"><input type="text" placeholder="Уточните комнату и суть дефекта" value="${note}" oninput="setNote('${it.id}', this.value)"></div>`;
+      card.appendChild(row);
+    });
+    root.appendChild(card);
+  });
+  document.getElementById("stat-total").textContent = `Проверено: ${checked}/${total}`;
+  document.getElementById("stat-ok").textContent = `Норма: ${ok}`;
+  document.getElementById("stat-bad").textContent = `Дефекты: ${bad}`;
+}
+function getDefectList() {
+  const list = [];
+  ZONES.forEach(z => z.items.filter(it => it.modes.includes(state.finishMode)).forEach(it => {
+    const d = state.items && state.items[it.id];
+    if (d && d.status === "bad") list.push({ zone: z.name, title: it.title, norm: it.norm, note: d.note || "" });
+  }));
+  return list;
+}
+function renderAct() {
+  const m = state.meta || {}, defects = getDefectList();
+  let rowsHtml = "";
+  if (!defects.length) { for (let i = 1; i <= 8; i++) rowsHtml += `<tr><td style="text-align:center">${i}</td><td></td><td></td><td></td><td>Устранить безвозмездно</td></tr>`; }
+  else defects.forEach((d, idx) => { rowsHtml += `<tr><td style="text-align:center">${idx+1}</td><td>${esc(d.zone)}</td><td><strong>${esc(d.title)}</strong>${d.note?"<br>Комментарий: "+esc(d.note):""}</td><td>${esc(d.norm)}</td><td>Устранить безвозмездно</td></tr>`; });
+  const diffTxt = (m.areaDdu && m.areaFact) ? `${esc(m.areaDdu)} м² / ${esc(m.areaFact)} м² (разница ${(parseFloat(m.areaFact)-parseFloat(m.areaDdu)).toFixed(2)} м²)` : "______ м² / ______ м²";
+  document.getElementById("act-print-area").innerHTML = `
+    <h2>Акт осмотра объекта долевого строительства<br>(Дефектная ведомость)</h2>
+    <p style="text-align:center;font-size:10.5pt;">Приложение к Акту приёма-передачи по ДДУ (ФЗ № 214-ФЗ)</p>
+    <table>
+      <tr><th style="width:36%">Застройщик</th><td>${esc(m.dev) || "________________________________________________"}</td></tr>
+      <tr><th>Участник долевого строительства</th><td>${esc(m.fio) || "________________________________________________"}<br>Паспорт: ${esc(m.pass) || "____________________________________"}</td></tr>
+      <tr><th>Договор долевого участия (ДДУ)</th><td>${esc(m.ddu) || "________________________________________________"}</td></tr>
+      <tr><th>Адрес объекта</th><td>${esc(m.addr) || "________________________________________________"}</td></tr>
+      <tr><th>Дата осмотра</th><td>${esc(m.date) || "«___» ____________ 202__ г."}</td></tr>
+      <tr><th>Площадь по ДДУ / Факт</th><td>${diffTxt}</td></tr>
+    </table>
+    <p><strong>Перечень выявленных строительных недостатков (дефектов):</strong></p>
+    <table><thead><tr><th style="width:5%">№</th><th style="width:18%">Зона / Помещение</th><th style="width:33%">Подробное описание дефекта</th><th style="width:28%">Норматив (СП / ГОСТ)</th><th style="width:16%">Требование дольщика</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+    <p style="font-size:10.5pt;">На основании ст. 7 Федерального закона № 214-ФЗ «Об участии в долевом строительстве...» Участник долевого строительства требует безвозмездного устранения указанных недостатков в разумный срок (в пределах срока, установленного действующим законодательством РФ и условиями ДДУ, но не более 60 календарных дней с даты подписания настоящего Акта, если меньший срок не согласован сторонами). Акт составлен в 2 (двух) экземплярах.</p>
+    <div class="sig-grid"><div>Участник долевого строительства:<br><br>________________ / ${esc(m.fio) || "______________"} /</div><div>Представитель Застройщика (по дов. № ____):<br><br>________________ / ____________________ /</div></div>`;
+}
+function copyActText() {
+  const m = state.meta || {}, defects = getDefectList();
+  let lines = ["ПЕРЕЧЕНЬ ВЫЯВЛЕННЫХ НЕДОСТАТКОВ (К АКТУ ОСМОТРА)", `Объект: ${m.addr||"не указан"}`, `Дата: ${m.date||"не указана"}`, `Площадь ДДУ/Факт: ${m.areaDdu||"-"} / ${m.areaFact||"-"} м²`, "----------------------------------------"];
+  if (!defects.length) lines.push("Дефекты пока не отмечены.");
+  defects.forEach((d, i) => { lines.push(`${i+1}. [${d.zone}] ${d.title}`); if (d.note) lines.push(`   Комментарий: ${d.note}`); lines.push(`   Норматив: ${d.norm}`); });
+  copyToClipboard(lines.join("\n"), "Перечень дефектов скопирован в буфер обмена.");
+}
+function renderTZBuilder() {
+  const root = document.getElementById("tz-builder-root"); root.innerHTML = "";
+  TZ_PRESETS.forEach(g => {
+    const box = document.createElement("div"); box.className = "tz-group"; box.innerHTML = `<strong>${g.group}</strong>`;
+    g.items.forEach(it => {
+      const checked = state.tz && state.tz[it.id] ? "checked" : "";
+      const lbl = document.createElement("label"); lbl.className = "tz-opt";
+      lbl.innerHTML = `<input type="checkbox" ${checked} onchange="toggleTZ('${it.id}', this.checked)"><span>${it.text}</span>`;
+      box.appendChild(lbl);
+    });
+    root.appendChild(box);
+  });
+  renderTZPrint();
+}
+function toggleTZ(id, val) { if (!state.tz) state.tz = {}; state.tz[id] = val; saveState(); renderTZPrint(); }
+function saveTZCustom() { state.tzCustom = document.getElementById("tz-custom").value; saveState(); renderTZPrint(); }
+function renderTZPrint() {
+  const m = state.meta || {}; let rows = "", idx = 1;
+  TZ_PRESETS.forEach(g => { const sel = g.items.filter(it => state.tz && state.tz[it.id]); if (sel.length) rows += `<tr><td style="text-align:center">${idx++}</td><td><strong>${g.group}</strong></td><td>${sel.map(s=>"• "+s.text).join("<br>")}</td></tr>`; });
+  if (state.tzCustom && state.tzCustom.trim()) rows += `<tr><td style="text-align:center">${idx++}</td><td><strong>Особые требования заказчика</strong></td><td>${esc(state.tzCustom).replace(/\n/g,"<br>")}</td></tr>`;
+  document.getElementById("tz-print-area").innerHTML = `<h2>Техническое задание для ремонтной бригады</h2><p style="text-align:center;font-size:10.5pt;">Приложение № 2 к Договору подряда</p><p><strong>Объект:</strong> ${esc(m.addr)||"_________________________________________"} &nbsp;|&nbsp; <strong>Дата:</strong> ${esc(m.date)||"____________"}</p><table><thead><tr><th style="width:6%">№</th><th style="width:28%">Раздел работ</th><th>Утверждённые технические требования</th></tr></thead><tbody>${rows||"<tr><td colspan='3'>Отметьте пункты выше.</td></tr>"}</tbody></table><p style="font-size:10.5pt;">Отступление от указанных требований без письменного согласования с Заказчиком не допускается.</p><div class="sig-grid"><div>Заказчик:<br><br>________________ / ${esc(m.fio)||"______________"} /</div><div>Подрядчик:<br><br>________________ / ____________________ /</div></div>`;
+}
+function copyTZMessenger() {
+  const m = state.meta || {}; let lines = [`ТЕХНИЧЕСКОЕ ЗАДАНИЕ НА РЕМОНТ (${m.addr||"квартира"}):`];
+  TZ_PRESETS.forEach(g => { const sel = g.items.filter(it => state.tz && state.tz[it.id]); if (sel.length) { lines.push(`\n${g.group}:`); sel.forEach(s => lines.push(`- ${s.text}`)); } });
+  if (state.tzCustom && state.tzCustom.trim()) lines.push(`\nДополнительно:\n${state.tzCustom.trim()}`);
+  copyToClipboard(lines.join("\n"), "ТЗ скопировано для отправки в Telegram или WhatsApp.");
+}
+function calcAll() {
+  const tA=Math.max(0,parseFloat(vId("c-tile-area"))||0), tW=Math.max(0,parseFloat(vId("c-tile-waste"))||0), tP=Math.max(0.05,parseFloat(vId("c-tile-pack"))||1.44);
+  const tN=tA*(1+tW/100), tPk=Math.ceil(tN/tP), tKg=Math.round(tPk*tP*21);
+  document.getElementById("res-tile").innerHTML = `Площадь с запасом: ${tN.toFixed(2)} м² -> <strong>Купить: ${tPk} уп.</strong> (вес ~${tKg} кг${tKg>450?", нужна Газель":""})`;
+  const fA=Math.max(0,parseFloat(vId("c-fl-area"))||0), fW=Math.max(0,parseFloat(vId("c-fl-waste"))||0), fP=Math.max(0.05,parseFloat(vId("c-fl-pack"))||2.13);
+  const fN=fA*(1+fW/100), fPk=Math.ceil(fN/fP), fKg=Math.round(fPk*16);
+  document.getElementById("res-floor").innerHTML = `Площадь с запасом: ${fN.toFixed(2)} м² -> <strong>Купить: ${fPk} уп.</strong> (вес ~${fKg} кг)`;
+  const pA=Math.max(0,parseFloat(vId("c-pl-area"))||0), pT=Math.max(0,parseFloat(vId("c-pl-thick"))||0), pR=Math.max(0.1,parseFloat(vId("c-pl-rate"))||0.9);
+  const pKg=pA*pT*pR, pB=Math.ceil(pKg/30), pTot=pB*30;
+  const tr = pTot>1500?"нужна машина 3 т (или 2 рейса Газели)":(pTot>450?"нужна Газель 1,5 т":"поместится в легковой авто");
+  document.getElementById("res-plaster").innerHTML = `Сухой смеси: ${Math.round(pKg)} кг -> <strong>Купить: ${pB} меш. по 30 кг</strong> (вес ${pTot} кг: ${tr})`;
+  const ptA=Math.max(0,parseFloat(vId("c-pt-area"))||0), ptL=Math.max(1,parseFloat(vId("c-pt-layers"))||2), ptC=Math.max(0.5,parseFloat(vId("c-pt-cov"))||9.5);
+  const ptLit=Math.ceil((ptA*ptL/ptC)*1.1);
+  document.getElementById("res-paint").innerHTML = `С запасом 10% -> <strong>Купить: ${ptLit} л краски</strong> (вес ~${Math.round(ptLit*1.4)} кг)`;
+}
+function printSection(tabId) {
+  if (tabId==="tab-act") renderAct(); if (tabId==="tab-tz") renderTZPrint();
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("print-active"));
+  document.getElementById(tabId).classList.add("print-active"); window.print();
+}
+function copyToClipboard(text, msg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>alert(msg)).catch(()=>fallbackCopy(text,msg));
+  else fallbackCopy(text, msg);
+}
+function fallbackCopy(text, msg) { const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); alert(msg); }
+function exportBackup() { const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="pomoshchnik_novosela_backup.json"; a.click(); }
+function importBackup(ev) {
+  const file=ev.target.files[0]; if (!file) return;
+  const r=new FileReader(); r.onload=e=>{ try { state=JSON.parse(e.target.result); saveState(); loadMeta(); setFinishMode(state.finishMode||"whitebox"); renderTZBuilder(); alert("Данные загружены."); } catch { alert("Ошибка файла."); } }; r.readAsText(file);
+}
+function resetAll() { if (confirm("Очистить все введённые данные и отметки?")) { localStorage.removeItem("novosel_v21"); localStorage.removeItem("novosel_v2"); location.reload(); } }
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+loadMeta(); setFinishMode(state.finishMode); renderTZBuilder(); calcAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1B365D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Юридический и закупочный щит 2.1: Конструктор договоров и актов</title>
+<style>
+  :root { --navy: #1B365D; --slate: #2C4D75; --bg: #F1F5F9; --card: #FFFFFF; --text: #0F172A; --muted: #64748B; --border: #CBD5E1; }
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Liberation Sans", Arial, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 60px; }
+  header { background: var(--navy); color: #fff; padding: 14px 16px 10px; position: sticky; top: 0; z-index: 100; }
+  header h1 { margin: 0 0 3px; font-size: 18px; }
+  header p { margin: 0; font-size: 12px; color: #CBD5E1; }
+  .nav-tabs { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .nav-tab { background: rgba(255,255,255,0.14); color: #E2E8F0; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .nav-tab.active { background: #fff; color: var(--navy); }
+  .container { max-width: 880px; margin: 0 auto; padding: 14px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .card h2 { margin: 0 0 10px; font-size: 16px; color: var(--navy); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  input, select { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #F8FAFC; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+  .mode-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .mode-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .info-banner { background: #EBF3FA; border-left: 4px solid var(--navy); padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+  .warn-box { background: #FEF3C7; border-left: 4px solid #D97706; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; color: #78350F; margin-bottom: 12px; }
+  .btn-primary { background: var(--navy); color: #fff; border: none; border-radius: 10px; padding: 11px 16px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-secondary { background: #E2E8F0; color: var(--text); border: none; border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .print-doc { background: #fff; border: 1px solid #94A3B8; padding: 26px; border-radius: 8px; font-family: "Times New Roman", "Liberation Serif", "DejaVu Serif", Georgia, serif; color: #000; font-size: 11.5pt; line-height: 1.38; }
+  .print-doc h2 { text-align: center; font-size: 13.5pt; color: #000; margin: 0 0 10px; text-transform: uppercase; }
+  .print-doc h3 { font-size: 11.5pt; color: #000; margin: 12px 0 4px; text-transform: uppercase; }
+  .print-doc p { margin: 4px 0; text-align: justify; }
+  .print-doc table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10.5pt; }
+  .print-doc th, .print-doc td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: top; }
+  .print-doc th { background: #F1F5F9; font-weight: bold; }
+  .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 22px; font-size: 11pt; }
+  .disclaimer { font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 16px; padding: 12px; background: #E2E8F0; border-radius: 8px; }
+  @media print {
+    @page { size: A4 portrait; margin: 15mm; }
+    body { background: #fff; padding: 0; }
+    header, .no-print, .disclaimer, .warn-box { display: none !important; }
+    .container { max-width: 100%; padding: 0; }
+    .tab-panel { display: none !important; }
+    .tab-panel.print-active { display: block !important; }
+    .print-doc { border: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="no-print">
+  <h1>Юридический и закупочный щит 2.1</h1>
+  <p>Заполните реквизиты один раз • Автоподстройка договора под статус подрядчика • Офлайн на iPhone, Android и ПК</p>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('t-data', this)">0. Реквизиты и этапы</button>
+    <button class="nav-tab" onclick="switchTab('t-contract', this)">1. Договор подряда</button>
+    <button class="nav-tab" onclick="switchTab('t-receipt', this)">2. Расписка на материалы</button>
+    <button class="nav-tab" onclick="switchTab('t-hidden', this)">3. Акт скрытых работ</button>
+    <button class="nav-tab" onclick="switchTab('t-supply', this)">4. График снабжения</button>
+  </div>
+</header>
+<div class="container">
+  <section id="t-data" class="tab-panel active">
+    <div class="card">
+      <h2>Выберите статус вашего подрядчика</h2>
+      <div class="pill-row">
+        <button class="mode-btn" id="st-fiz" onclick="setContractorType('fiz')">Физлицо (частный мастер)</button>
+        <button class="mode-btn" id="st-npd" onclick="setContractorType('npd')">Самозанятый (НПД)</button>
+        <button class="mode-btn" id="st-ip" onclick="setContractorType('ip')">ИП</button>
+        <button class="mode-btn" id="st-ooo" onclick="setContractorType('ooo')">ООО (строительная фирма)</button>
+      </div>
+      <div class="info-banner" id="type-hint"></div>
+      <div class="grid-2">
+        <div><label>Город заключения договора</label><input id="f-city" placeholder="г. Москва" oninput="save()"></div>
+        <div><label>Дата договора</label><input type="date" id="f-date" oninput="save()"></div>
+        <div><label>Заказчик (ФИО полностью)</label><input id="f-cust-fio" placeholder="Иванов Иван Иванович" oninput="save()"></div>
+        <div><label>Паспорт Заказчика</label><input id="f-cust-pass" placeholder="45 12 № 123456, выдан..." oninput="save()"></div>
+        <div><label id="lbl-cont-name">Подрядчик (ФИО / ИП / Название ООО)</label><input id="f-cont-name" placeholder="ИП Петров Пётр Петрович" oninput="save()"></div>
+        <div><label id="lbl-cont-req">Реквизиты Подрядчика</label><input id="f-cont-req" placeholder="ИНН 7701..., ОГРНИП..." oninput="save()"></div>
+        <div><label>Адрес квартиры (объекта ремонта)</label><input id="f-addr" placeholder="г. Москва, ул. Примерная, д. 10, кв. 45" oninput="save()"></div>
+        <div><label>Срок выполнения (начало и окончание)</label><input id="f-dates" placeholder="с 01.05.2026 по 01.08.2026" oninput="save()"></div>
+      </div>
+      <h2 style="margin-top:16px;">Поэтапная оплата работ (₽)</h2>
+      <div class="grid-2">
+        <div><label>Этап 1 (Демонтаж, перегородки, штукатурка, стяжка)</label><input type="number" id="f-s1" value="180000" min="0" oninput="save()"></div>
+        <div><label>Этап 2 (Черновая электрика, сантехника, гидроизоляция)</label><input type="number" id="f-s2" value="160000" min="0" oninput="save()"></div>
+        <div><label>Этап 3 (Плитка, малярка, полы, потолки)</label><input type="number" id="f-s3" value="220000" min="0" oninput="save()"></div>
+        <div><label>Этап 4 (Чистовая установка, двери, плинтусы, сдача)</label><input type="number" id="f-s4" value="120000" min="0" oninput="save()"></div>
+      </div>
+      <div class="info-banner" style="margin-top:10px;" id="sum-box"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;">
+        <button class="btn-secondary" onclick="exportShield()">Сохранить копию (.json)</button>
+        <button class="btn-secondary" onclick="document.getElementById('imp-shield').click()">Загрузить копию (.json)</button>
+        <input type="file" id="imp-shield" accept=".json" style="display:none" onchange="importShield(event)">
+        <button class="btn-secondary" style="color:#B91C1C;" onclick="resetShield()">Сбросить данные</button>
+      </div>
+    </div>
+  </section>
+  <section id="t-contract" class="tab-panel">
+    <div class="warn-box no-print"><strong>Чистая печать:</strong> при нажатии кнопки печати все меню, подсказки и дисклеймер автоматически скроются.</div>
+    <div class="no-print" style="margin-bottom:10px;"><button class="btn-primary" onclick="printDoc('t-contract')">Печать Договора / Сохранить PDF (А4)</button></div>
+    <div class="print-doc" id="doc-contract"></div>
+  </section>
+  <section id="t-receipt" class="tab-panel">
+    <div class="no-print" style="margin-bottom:10px;"><button class="btn-primary" onclick="printDoc('t-receipt')">Печать Расписки / Сохранить PDF (А4)</button></div>
+    <div class="print-doc" id="doc-receipt"></div>
+  </section>
+  <section id="t-hidden" class="tab-panel">
+    <div class="no-print" style="margin-bottom:10px;"><button class="btn-primary" onclick="printDoc('t-hidden')">Печать Акта скрытых работ / Сохранить PDF (А4)</button></div>
+    <div class="print-doc" id="doc-hidden"></div>
+  </section>
+  <section id="t-supply" class="tab-panel">
+    <div class="no-print" style="margin-bottom:10px;"><button class="btn-primary" onclick="printDoc('t-supply')">Печать Графика снабжения / Сохранить PDF (А4)</button></div>
+    <div class="print-doc" id="doc-supply"></div>
+  </section>
+  <div class="disclaimer no-print">
+    <strong>Правовая информация (не выводится на печать):</strong> Шаблоны носят информационно-справочный характер и не являются индивидуальной юридической консультацией. Проверяйте реквизиты и условия под конкретную сделку.
+  </div>
+</div>
+<script>
+function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+let d = JSON.parse(localStorage.getItem("shield_v21") || localStorage.getItem("shield_v2") || "{}");
+if (!d.type) d.type = "ip";
+const TYPE_INFO = {
+  fiz: "<strong>Физлицо (частный мастер):</strong> Закон «О защите прав потребителей» НЕ применяется. Используется договор подряда по ГК РФ (гл. 37) с договорной неустойкой 0,5% в день и паспортными данными.",
+  npd: "<strong>Самозанятый (НПД):</strong> обязательный пункт о выдаче чека из «Мой налог» после каждой оплаты и уведомлении о снятии с учёта. Примечание: в спорах по бытовому ремонту суды в ряде случаев также применяют нормы ЗоЗПП.",
+  ip: "<strong>Индивидуальный предприниматель (ИП):</strong> действует полная защита по Закону РФ «О защите прав потребителей» (законная неустойка 3% в день по п. 5 ст. 28 ЗоЗПП, её нельзя снизить договором).",
+  ooo: "<strong>Юридическое лицо (ООО):</strong> действует полная защита по Закону РФ «О защите прав потребителей» (неустойка 3% в день по п. 5 ст. 28 ЗоЗПП), проверка полномочий подписанта и банковские реквизиты."
+};
+const REQ_UI = {
+  fiz: { name: "Подрядчик (ФИО частного мастера)", req: "Паспортные данные и регистрация мастера", phName: "Петров Пётр Петрович", phReq: "Паспорт 45 14 № 654321, выдан..." },
+  npd: { name: "Подрядчик (ФИО самозанятого)", req: "ИНН (НПД) и паспортные данные", phName: "Петров Пётр Петрович (НПД)", phReq: "ИНН 770112345678, паспорт..." },
+  ip:  { name: "Подрядчик (ИП ФИО полностью)", req: "ИНН, ОГРНИП и расчётный счёт ИП", phName: "ИП Петров Пётр Петрович", phReq: "ИНН 7701..., ОГРНИП 32077..., р/с..." },
+  ooo: { name: "Подрядчик (ООО и ФИО генерального директора)", req: "ИНН, КПП, ОГРН, юр. адрес, р/с и основание полномочий (Устав/доверенность)", phName: "ООО «СтройМастер» в лице директора Петрова П.П.", phReq: "ИНН 7701..., КПП 770101001, ОГРН 12077..., на основании Устава" }
+};
+function switchTab(id, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+  document.getElementById(id).classList.add("active"); btn.classList.add("active"); renderAllDocs();
+}
+function setContractorType(t) {
+  d.type = t; save();
+  ["fiz","npd","ip","ooo"].forEach(x => document.getElementById("st-"+x).classList.toggle("active", x===t));
+  document.getElementById("type-hint").innerHTML = TYPE_INFO[t];
+  document.getElementById("lbl-cont-name").textContent = REQ_UI[t].name;
+  document.getElementById("lbl-cont-req").textContent = REQ_UI[t].req;
+  document.getElementById("f-cont-name").placeholder = REQ_UI[t].phName;
+  document.getElementById("f-cont-req").placeholder = REQ_UI[t].phReq;
+}
+function save() {
+  d.city=document.getElementById("f-city").value; d.date=document.getElementById("f-date").value;
+  d.custFio=document.getElementById("f-cust-fio").value; d.custPass=document.getElementById("f-cust-pass").value;
+  d.contName=document.getElementById("f-cont-name").value; d.contReq=document.getElementById("f-cont-req").value;
+  d.addr=document.getElementById("f-addr").value; d.dates=document.getElementById("f-dates").value;
+  d.s1=Math.max(0,parseInt(document.getElementById("f-s1").value)||0); d.s2=Math.max(0,parseInt(document.getElementById("f-s2").value)||0);
+  d.s3=Math.max(0,parseInt(document.getElementById("f-s3").value)||0); d.s4=Math.max(0,parseInt(document.getElementById("f-s4").value)||0);
+  localStorage.setItem("shield_v21", JSON.stringify(d));
+  document.getElementById("sum-box").innerHTML = `<strong>Итоговая твёрдая стоимость всех 4 этапов: ${(d.s1+d.s2+d.s3+d.s4).toLocaleString("ru-RU")} ₽</strong>`;
+  renderAllDocs();
+}
+function load() {
+  document.getElementById("f-city").value = d.city || "г. Москва";
+  document.getElementById("f-date").value = d.date || new Date().toISOString().slice(0,10);
+  document.getElementById("f-cust-fio").value = d.custFio || "";
+  document.getElementById("f-cust-pass").value = d.custPass || "";
+  document.getElementById("f-cont-name").value = d.contName || "";
+  document.getElementById("f-cont-req").value = d.contReq || "";
+  document.getElementById("f-addr").value = d.addr || "";
+  document.getElementById("f-dates").value = d.dates || "";
+  if (d.s1!==undefined) document.getElementById("f-s1").value = d.s1;
+  if (d.s2!==undefined) document.getElementById("f-s2").value = d.s2;
+  if (d.s3!==undefined) document.getElementById("f-s3").value = d.s3;
+  if (d.s4!==undefined) document.getElementById("f-s4").value = d.s4;
+  setContractorType(d.type);
+}
+function renderAllDocs() {
+  const total=(d.s1||0)+(d.s2||0)+(d.s3||0)+(d.s4||0), city=esc(d.city)||"г. ______________", dt=esc(d.date)||"«___» _________ 202__ г.";
+  const cfio=esc(d.custFio)||"________________________________________", cpass=esc(d.custPass)||"________________________________________";
+  const pname=esc(d.contName)||"________________________________________", preq=esc(d.contReq)||"________________________________________";
+  const addr=esc(d.addr)||"________________________________________", dates=esc(d.dates)||"с «___» _______ 202__ г. по «___» _______ 202__ г.";
+  let title="", legalBase="", penaltyClause="", extraClause="";
+  if (d.type==="fiz") {
+    title="ДОГОВОР ПОДРЯДА С ФИЗИЧЕСКИМ ЛИЦОМ № ____"; legalBase="Отношения сторон регулируются главой 37 ГК РФ (подряд).";
+    penaltyClause="3.2. За нарушение сроков выполнения этапа или всего объёма работ Подрядчик уплачивает Заказчику договорную неустойку (ст. 330 ГК РФ) в размере 0,5% от стоимости невыполненных работ за каждый день просрочки.";
+  } else if (d.type==="npd") {
+    title="ДОГОВОР ПОДРЯДА С САМОЗАНЯТЫМ (ПЛАТЕЛЬЩИКОМ НПД) № ____"; legalBase="Подрядчик подтверждает статус плательщика НПД (ФЗ № 422-ФЗ). В спорах по бытовому ремонту суды в ряде случаев также применяют нормы Закона РФ «О защите прав потребителей».";
+    penaltyClause="3.2. За нарушение сроков выполнения этапа или всего объёма работ Подрядчик уплачивает Заказчику неустойку в размере 0,5% от стоимости невыполненных работ за каждый день просрочки (ст. 330 ГК РФ, если иная более высокая неустойка не подлежит применению по закону).";
+    extraClause="<p>2.4. На каждую полученную от Заказчика сумму Подрядчик обязан сформировать и передать чек из приложения «Мой налог» в день оплаты. При снятии с учёта НПД Подрядчик обязан письменно уведомить Заказчика в течение 3 календарных дней.</p>";
+  } else {
+    title = d.type==="ip" ? "ДОГОВОР БЫТОВОГО ПОДРЯДА (С ИП) № ____" : "ДОГОВОР БЫТОВОГО ПОДРЯДА (С ООО) № ____";
+    legalBase="Отношения сторон регулируются ГК РФ и Законом РФ «О защите прав потребителей» № 2300-1.";
+    penaltyClause="3.2. За нарушение сроков выполнения этапа или всего объёма работ Подрядчик уплачивает Заказчику законную неустойку в размере 3% от цены соответствующего этапа (или общей цены договора) за каждый день просрочки на основании п. 5 ст. 28 Закона РФ «О защите прав потребителей».";
+    extraClause="<p>2.4. Оплата производится по реквизитам Подрядчика с обязательной выдачей кассового чека или подтверждающего платёжного документа.</p>";
+  }
+  document.getElementById("doc-contract").innerHTML = `<h2>${title}</h2><p style="display:flex;justify-content:space-between;"><span>${city}</span><span>${dt}</span></p><p>Гражданин(ка) <strong>${cfio}</strong>, паспорт: ${cpass}, именуемый(ая) «Заказчик», и <strong>${pname}</strong> (${preq}), именуемый(ая) «Подрядчик», заключили настоящий Договор:</p><h3>1. Предмет договора и сроки</h3><p>1.1. Подрядчик обязуется выполнить ремонтно-отделочные работы по адресу: <strong>${addr}</strong>, согласно Смете (Приложение № 1) и ТЗ (Приложение № 2).</p><p>1.2. Срок работ: <strong>${dates}</strong>. ${legalBase}</p><p>1.3. Подрядчик обязуется соблюдать СП 71.13330.2017, ПУЭ, СП 30.13330 и закон о тишине.</p><h3>2. Стоимость и поэтапная оплата</h3><p>2.1. Общая стоимость работ составляет <strong>${total.toLocaleString("ru-RU")} рублей</strong> и является твёрдой.</p><p>2.2. Оплата производится строго по факту приёмки этапа по Акту:<br>• Этап 1: <strong>${(d.s1||0).toLocaleString("ru-RU")} руб.</strong><br>• Этап 2: <strong>${(d.s2||0).toLocaleString("ru-RU")} руб.</strong><br>• Этап 3: <strong>${(d.s3||0).toLocaleString("ru-RU")} руб.</strong><br>• Этап 4: <strong>${(d.s4||0).toLocaleString("ru-RU")} руб.</strong></p><p>2.3. Авансирование работ без промежуточного Акта не производится.</p>${extraClause}<h3>3. Скрытые работы, ответственность и гарантия</h3><p>3.1. До закрытия скрытых работ Подрядчик обязан подписать с Заказчиком Акт освидетельствования скрытых работ с фотофиксацией. При закрытии без Акта вскрытие производится за счёт Подрядчика.</p><p>${penaltyClause}</p><p>3.3. Подрядчик несёт материальную ответственность за порчу материалов Заказчика. Гарантия на работы: 24 месяца.</p><div class="sig-grid"><div><strong>Заказчик:</strong><br>${cfio}<br><br>________________ / Подпись</div><div><strong>Подрядчик:</strong><br>${pname}<br><br>________________ / Подпись</div></div>`;
+  document.getElementById("doc-receipt").innerHTML = `<h2>Расписка в получении денежных средств на закупку материалов</h2><p style="display:flex;justify-content:space-between;"><span>${city}</span><span>${dt}</span></p><p>Я, <strong>${pname}</strong> (${preq}), получил(а) от Заказчика <strong>${cfio}</strong> сумму ________________________ (____________________________________) рублей целевым назначением на закупку строительных материалов для объекта: <strong>${addr}</strong>.</p><p>Обязуюсь в срок до «___» _________ 202__ г. предоставить оригиналы кассовых и товарных чеков (с QR-кодом ФНС) на всю сумму, а остаток вернуть Заказчику.</p><div class="sig-grid"><div>Передал (Заказчик):<br><br>________________ / ${cfio} /</div><div>Получил (Подрядчик):<br><br>________________ / ${pname} /</div></div>`;
+  document.getElementById("doc-hidden").innerHTML = `<h2>Акт освидетельствования скрытых работ</h2><p style="display:flex;justify-content:space-between;"><span>${city}</span><span>${dt}</span></p><p><strong>Объект:</strong> ${addr}. <strong>Заказчик:</strong> ${cfio}. <strong>Подрядчик:</strong> ${pname}.</p><table><thead><tr><th style="width:6%">№</th><th style="width:36%">Вид скрытых работ</th><th style="width:24%">Проверка / Опрессовка</th><th style="width:14%">Фото</th><th style="width:20%">Замечания</th></tr></thead><tbody><tr><td>1</td><td>Черновая электропроводка, кабель в гофре</td><td>Прозвонка, схема</td><td>Да / Нет</td><td></td></tr><tr><td>2</td><td>Гидроизоляция мокрых зон (2 слоя + лента)</td><td>Сплошность слоя</td><td>Да / Нет</td><td></td></tr><tr><td>3</td><td>Коллекторный узел, разводка ХВС/ГВС и отопления</td><td>Опрессовка ___ бар</td><td>Да / Нет</td><td></td></tr><tr><td>4</td><td>Трассы кондиционеров и дренаж (пролив водой)</td><td>Уклон, герметичность</td><td>Да / Нет</td><td></td></tr><tr><td>5</td><td>Шумоизоляция стояков / закладные под шкафы</td><td>Визуальный осмотр</td><td>Да / Нет</td><td></td></tr></tbody></table><p>Решение: работы соответствуют ТЗ и нормам. Разрешается закрытие скрытых работ.</p><div class="sig-grid"><div>Заказчик:<br><br>________________ / ${cfio} /</div><div>Подрядчик:<br><br>________________ / ${pname} /</div></div>`;
+  document.getElementById("doc-supply").innerHTML = `<h2>График снабжения и доставки материалов на объект</h2><p><strong>Объект:</strong> ${addr} &nbsp;|&nbsp; <strong>Дата:</strong> ${dt}</p><table><thead><tr><th>Этап и группа материалов</th><th>Срок заказа</th><th>Ответственный</th><th>Статус / Дата</th></tr></thead><tbody><tr><td>Этап 1. Черновые смеси, блоки, маяки, грунтовка</td><td>За 3-5 дней до старта</td><td>Подрядчик / Заказчик</td><td></td></tr><tr><td>Этап 2. Кабель, щиток, трубы, инсталляции, трап</td><td>После штукатурки</td><td>Заказчик / Подрядчик</td><td></td></tr><tr><td>Этап 3. Керамогранит, клей, затирка, люки</td><td>За 14 дней до плитки</td><td>Заказчик</td><td></td></tr><tr><td>Этап 3. Краска, обои, кварцвинил/ламинат</td><td>За 7-10 дней до малярки</td><td>Заказчик</td><td></td></tr><tr><td>Этап 4. Межкомнатные двери и плинтусы</td><td>За 21-30 дней (после стяжки)</td><td>Заказчик</td><td></td></tr><tr><td>Этап 4. Чистовая электрика, свет, кухня</td><td>За 10-14 дней до финиша</td><td>Заказчик</td><td></td></tr></tbody></table><div class="sig-grid"><div>Заказчик: ________________ / ${cfio} /</div><div>Подрядчик: ________________ / ${pname} /</div></div>`;
+}
+function printDoc(tabId) { renderAllDocs(); document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("print-active")); document.getElementById(tabId).classList.add("print-active"); window.print(); }
+function exportShield() { const blob=new Blob([JSON.stringify(d,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="yuridicheskiy_shchit_backup.json"; a.click(); }
+function importShield(ev) { const f=ev.target.files[0]; if (!f) return; const r=new FileReader(); r.onload=e=>{ try { d=JSON.parse(e.target.result); localStorage.setItem("shield_v21",JSON.stringify(d)); load(); alert("Реквизиты загружены."); } catch { alert("Ошибка файла."); } }; r.readAsText(f); }
+function resetShield() { if (confirm("Очистить все введённые реквизиты и суммы?")) { localStorage.removeItem("shield_v21"); localStorage.removeItem("shield_v2"); location.reload(); } }
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+load();
+</script>
+</body>
+</html>
